@@ -112,8 +112,8 @@ export default function LoginPage() {
               <div className="flex justify-center mb-4">
                 <div className="bg-white p-3 rounded-2xl shadow-lg">
                   <Image 
-                    src="/images/ArenoLogisticsLogo.png" 
-                    alt="Areno Logistics" 
+                    src="/images/IrisLogo.png" 
+                    alt="iRis" 
                     width={60} 
                     height={60} 
                     className="object-contain"
@@ -121,10 +121,10 @@ export default function LoginPage() {
                 </div>
               </div>
               <CardTitle className="text-2xl font-bold text-white">
-                Welcome Back
+                Welcome to iRis
               </CardTitle>
               <p className="text-orange-100 text-sm">
-                Sign in to access the Areno Logistics admin dashboard
+                Sign in to access the iRis Management System
               </p>
             </CardHeader>
 

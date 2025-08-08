@@ -43,7 +43,7 @@ export default function FinancialPerformanceReportPage() {
   const [generatedReport, setGeneratedReport] = useState<any>(null)
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
     }
   }, [user, loading, router])

@@ -48,13 +48,13 @@ export default function AnalyticsPage() {
   const [selectedChart, setSelectedChart] = useState("overview")
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
     }
   }, [user, loading, router])
 
   useEffect(() => {
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadAnalytics()
     }
   }, [user, timeFilter, serviceFilter, regionFilter])

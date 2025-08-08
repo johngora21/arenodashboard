@@ -131,13 +131,13 @@ export default function ShipmentsPage() {
   })
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
     }
   }, [user, loading, router])
 
   useEffect(() => {
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadShipments()
       loadEmployees() // Load employees when page loads
     }

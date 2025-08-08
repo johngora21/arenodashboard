@@ -168,12 +168,12 @@ export default function ShipmentManagementPage() {
   }
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
       return
     }
 
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadData()
     }
   }, [user, loading])

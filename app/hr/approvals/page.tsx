@@ -97,13 +97,13 @@ export default function ApprovalsPage() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
     }
   }, [user, loading, router])
 
   useEffect(() => {
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadAllApprovals()
       loadEmployees()
     }

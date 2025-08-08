@@ -205,7 +205,7 @@ export default function ChatPage() {
 
   // Initialize calling service
   useEffect(() => {
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       // Set up call state callback
       callingService.setCallStateCallback((state) => {
         setCallState(state)

@@ -57,15 +57,17 @@ export default function Header() {
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link href="/chat">
+          <Link href="/chats">
             <Button variant="ghost" size="icon" className="hover:bg-slate-100">
               <MessageSquare className="h-5 w-5" />
             </Button>
           </Link>
           
-          <Button variant="ghost" size="icon">
-            <Bell className="h-5 w-5" />
-          </Button>
+          <Link href="/notifications">
+            <Button variant="ghost" size="icon">
+              <Bell className="h-5 w-5" />
+            </Button>
+          </Link>
           
           <div className="flex items-center space-x-2">
             <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">
@@ -80,4 +82,4 @@ export default function Header() {
       </div>
     </header>
   )
-} 
+}

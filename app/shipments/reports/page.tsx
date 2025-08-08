@@ -152,12 +152,12 @@ export default function ShipmentsReportsPage() {
   const [financeApprovals, setFinanceApprovals] = useState<any[]>([])
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
       return
     }
 
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadReports()
       fetchApprovedShipments()
     }

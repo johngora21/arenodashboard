@@ -99,13 +99,13 @@ export default function QuotesPage() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!loading && !user) {
+    if (false) { // Temporarily disabled authentication
       router.push('/login')
     }
   }, [user, loading, router])
 
   useEffect(() => {
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadData()
     }
   }, [user])
@@ -276,7 +276,7 @@ export default function QuotesPage() {
 
     switch (template) {
       case "quote_ready":
-        setSmsMessage(`Dear ${contactPerson}, your ${serviceType} quote is ready! Please check your email or contact us at +255 XXX XXX XXX to discuss the details. Thank you for choosing Areno Logistics.`)
+        setSmsMessage(`Dear ${contactPerson}, your ${serviceType} quote is ready! Please check your email or contact us at +255 XXX XXX XXX to discuss the details. Thank you for choosing iRis.`)
         break
       case "service_update":
         setSmsMessage(`Dear ${contactPerson}, your ${serviceType} service has been updated. We will keep you updated on any changes. For questions, call +255 XXX XXX XXX.`)
@@ -318,7 +318,7 @@ export default function QuotesPage() {
       // Send Email if email is available
       if (selectedQuoteForSMS.contactInfo.email) {
         hasEmail = true
-        const senderName = user?.displayName || user?.email || 'Areno Logistics Admin'
+        const senderName = user?.displayName || user?.email || 'iRis Admin'
         const senderEmail = user?.email || 'admin@arenologistics.com'
         
         const emailResult = await emailService.sendQuoteMessageEmail(
@@ -369,7 +369,7 @@ export default function QuotesPage() {
   // Email functionality
   const handleSendEmail = async (quote: QuoteData, message: string) => {
     try {
-      const senderName = user?.displayName || user?.email || 'Areno Logistics Admin'
+      const senderName = user?.displayName || user?.email || 'iRis Admin'
       const senderEmail = user?.email || 'admin@arenologistics.com'
       
       const result = await emailService.sendQuoteMessageEmail(

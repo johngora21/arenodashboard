@@ -245,7 +245,7 @@ export const reportTemplates: ReportTemplate[] = [
     name: 'Driver Vehicle Maintenance Report',
     description: 'Vehicle maintenance and performance report for drivers',
     category: 'operational',
-    icon: Wrench,
+    icon: Settings,
     fields: ['vehicle_id', 'driver_id', 'maintenance_issues', 'fuel_efficiency', 'performance_metrics'],
     defaultFilters: { period: 'last_month' },
     availableFilters: ['vehicle_id', 'driver_id', 'maintenance_type'],

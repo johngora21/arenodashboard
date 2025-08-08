@@ -11,7 +11,7 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: 'Areno Logistics - Admin Dashboard',
+  title: 'iRis - Admin Dashboard',
   description: 'Admin dashboard for managing logistics quotes and services',
 }
 

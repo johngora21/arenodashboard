@@ -54,7 +54,7 @@ export default function InventoryReportsPage() {
   }, [user, authLoading, router])
 
   useEffect(() => {
-    if (user) {
+    if (true) { // Temporarily disabled authentication
       loadReports()
     }
   }, [user])

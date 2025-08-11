@@ -53,11 +53,11 @@ export default function Header() {
     <header className="bg-white border-b border-slate-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h1 className="text-xl font-semibold text-slate-900">Management System</h1>
+          <h1 className="text-xl font-semibold text-slate-900">Human Resource Management</h1>
         </div>
 
         <div className="flex items-center space-x-4">
-          <Link href="/chats">
+          <Link href="/chat">
             <Button variant="ghost" size="icon" className="hover:bg-slate-100">
               <MessageSquare className="h-5 w-5" />
             </Button>

@@ -1,496 +1,230 @@
-"use client"
+'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { 
-  Send, 
-  Plus, 
-  Users, 
-  Search, 
-  MoreVertical, 
-  Paperclip, 
-  Image as ImageIcon,
-  Video,
-  File,
-  Smile,
-  Phone,
-  Video as VideoCall,
-  Settings,
-  Trash2,
-  Edit,
-  UserPlus,
-  UserMinus,
-  MessageCircle,
-  Clock,
-  Check,
-  CheckCheck,
-  ArrowLeft
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useAuth } from '@/components/AuthProvider'
-import MemberManagementModal from '@/components/MemberManagementModal'
-import {
-  ChatGroup,
-  ChatMessage,
-  ChatUser,
-  createChatGroup,
-  getChatGroups,
-  subscribeToChatGroups,
-  sendMessage,
-  getGroupMessages,
-  subscribeToGroupMessages,
-  getAllUsers,
-  subscribeToUserStatus,
-  markMessagesAsRead,
-  updateChatGroup,
-  deleteChatGroup,
-  addMessageReaction,
-  removeMessageReaction,
-  getReactionSummary
-} from '@/lib/chat-service'
-import { callingService, CallState, CallParticipant } from '@/lib/calling-service'
-import { getAllDepartments, Department } from '@/lib/firebase-service'
-import VideoCallInterface from '@/components/VideoCallInterface'
+import React, { useState, useEffect, useRef } from 'react'
+import Sidebar from '../../components/Sidebar'
+import Header from '../../components/Header'
 
 interface Message {
   id: string
-  content: string
-  sender: {
-    id: string
-    name: string
-    avatar?: string
-  }
+  text: string
+  sender: string
   timestamp: Date
-  type: 'text' | 'image' | 'file'
-  mediaUrl?: string
-  isRead: boolean
+  type: 'text' | 'file' | 'image'
+  fileUrl?: string
+  fileName?: string
 }
 
-interface Group {
+interface ChatGroup {
   id: string
   name: string
+  type: 'direct' | 'group'
   members: string[]
-  lastMessage?: Message
+  lastMessage?: string
+  lastMessageTime?: Date
   unreadCount: number
-  type: 'temporary' | 'permanent'
-  description?: string
+}
+
+interface Employee {
+  id: string
+  name: string
+  email: string
+  department: string
+  position: string
+  avatar?: string
 }
 
 export default function ChatPage() {
-  const { user } = useAuth()
-  const [groups, setGroups] = useState<ChatGroup[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
   const [selectedGroup, setSelectedGroup] = useState<ChatGroup | null>(null)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [showCreateGroup, setShowCreateGroup] = useState(false)
-  const [showMemberManagement, setShowMemberManagement] = useState(false)
-  const [allUsers, setAllUsers] = useState<ChatUser[]>([])
-  const [onlineUsers, setOnlineUsers] = useState<ChatUser[]>([])
-  const [newGroupName, setNewGroupName] = useState('')
-  const [newGroupDescription, setNewGroupDescription] = useState('')
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([])
-  const [departments, setDepartments] = useState<Department[]>([])
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('all')
-  const [filteredUsers, setFilteredUsers] = useState<ChatUser[]>([])
-  const [showGroupSettings, setShowGroupSettings] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [editingGroupName, setEditingGroupName] = useState('')
-  const [editingGroupDescription, setEditingGroupDescription] = useState('')
-  const [callState, setCallState] = useState<CallState>({
-    isActive: false,
-    type: null,
-    participants: [],
-    localAudioEnabled: true,
-    localVideoEnabled: true
-  })
-  const [showCallNotification, setShowCallNotification] = useState(false)
-  const [incomingCall, setIncomingCall] = useState<{type: 'audio' | 'video', caller: string, callerName: string} | null>(null)
   const [isTyping, setIsTyping] = useState(false)
-  const [typingUsers, setTypingUsers] = useState<string[]>([])
-  const [showQuickReplies, setShowQuickReplies] = useState(false)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
+  const [showCreateGroup, setShowCreateGroup] = useState(false)
+  const [showEmployeeList, setShowEmployeeList] = useState(false)
+  const [newGroupName, setNewGroupName] = useState('')
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Subscribe to chat groups
-  useEffect(() => {
-    if (!user?.uid) return
+  // Sample employees data
+  const [employees] = useState<Employee[]>([
+    { id: '1', name: 'John Doe', email: 'john.doe@company.com', department: 'Engineering', position: 'Senior Developer' },
+    { id: '2', name: 'Jane Smith', email: 'jane.smith@company.com', department: 'Design', position: 'UI/UX Designer' },
+    { id: '3', name: 'Mike Johnson', email: 'mike.johnson@company.com', department: 'Marketing', position: 'Marketing Manager' },
+    { id: '4', name: 'Sarah Wilson', email: 'sarah.wilson@company.com', department: 'Sales', position: 'Sales Representative' },
+    { id: '5', name: 'David Brown', email: 'david.brown@company.com', department: 'Engineering', position: 'Frontend Developer' },
+    { id: '6', name: 'Lisa Davis', email: 'lisa.davis@company.com', department: 'HR', position: 'HR Specialist' },
+    { id: '7', name: 'Tom Anderson', email: 'tom.anderson@company.com', department: 'Finance', position: 'Financial Analyst' },
+    { id: '8', name: 'Emily Taylor', email: 'emily.taylor@company.com', department: 'Design', position: 'Graphic Designer' }
+  ])
 
-    const unsubscribe = subscribeToChatGroups(user.uid, (groups) => {
-      setGroups(groups)
-    })
-
-    return () => unsubscribe()
-  }, [user?.uid])
-
-  // Subscribe to user status
-  useEffect(() => {
-    const unsubscribe = subscribeToUserStatus((users) => {
-      setOnlineUsers(users.filter(u => u.isOnline))
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  // Load all users and departments for member selection
-  useEffect(() => {
-    const loadUsersAndDepartments = async () => {
-      try {
-        console.log('Loading users and departments for chat...')
-        const [users, departmentsData] = await Promise.all([
-          getAllUsers(),
-          getAllDepartments()
-        ])
-        console.log('Loaded users:', users)
-        console.log('Loaded departments:', departmentsData)
-        setAllUsers(users)
-        setDepartments(departmentsData)
-      } catch (error) {
-        console.error('Error loading users and departments:', error)
-      }
+  // Sample data
+  const [groups, setGroups] = useState<ChatGroup[]>([
+    {
+      id: '1',
+      name: 'General Team',
+      type: 'group',
+      members: ['John Doe', 'Jane Smith', 'Mike Johnson'],
+      lastMessage: 'Great work everyone!',
+      lastMessageTime: new Date(Date.now() - 1000 * 60 * 30),
+      unreadCount: 2
+    },
+    {
+      id: '2',
+      name: 'Project Alpha',
+      type: 'group',
+      members: ['John Doe', 'Sarah Wilson'],
+      lastMessage: 'Meeting at 3 PM',
+      lastMessageTime: new Date(Date.now() - 1000 * 60 * 60),
+      unreadCount: 0
+    },
+    {
+      id: '3',
+      name: 'John Doe',
+      type: 'direct',
+      members: ['John Doe'],
+      lastMessage: 'Thanks for the update',
+      lastMessageTime: new Date(Date.now() - 1000 * 60 * 120),
+      unreadCount: 1
     }
-    loadUsersAndDepartments()
-  }, [])
+  ])
 
-  // Filter users based on selected department
-  useEffect(() => {
-    console.log('Filtering users - selectedDepartment:', selectedDepartment)
-    console.log('All users:', allUsers)
-    
-    if (selectedDepartment === 'all') {
-      setFilteredUsers(allUsers)
-    } else {
-      // Find the department name by ID
-      const selectedDept = departments.find(dept => dept.id === selectedDepartment)
-      const departmentName = selectedDept?.name
-      
-      console.log('Selected department:', selectedDept)
-      console.log('Department name to match:', departmentName)
-      
-      const filtered = allUsers.filter(user => {
-        // Check if user has department information
-        const userDepartment = (user as any).department
-        console.log('User department check:', user.name, userDepartment, departmentName)
-        return userDepartment === departmentName
-      })
-      setFilteredUsers(filtered)
+  const [sampleMessages] = useState<Message[]>([
+    {
+      id: '1',
+      text: 'Hello everyone! How are you doing?',
+      sender: 'John Doe',
+      timestamp: new Date(Date.now() - 1000 * 60 * 30),
+      type: 'text'
+    },
+    {
+      id: '2',
+      text: 'I\'m doing great! Working on the new feature.',
+      sender: 'Jane Smith',
+      timestamp: new Date(Date.now() - 1000 * 60 * 25),
+      type: 'text'
+    },
+    {
+      id: '3',
+      text: 'Great work everyone!',
+      sender: 'Mike Johnson',
+      timestamp: new Date(Date.now() - 1000 * 60 * 20),
+      type: 'text'
     }
-    
-    console.log('Filtered users result:', filteredUsers)
-  }, [allUsers, selectedDepartment, departments])
+  ])
 
-  // Subscribe to messages for selected group
   useEffect(() => {
-    if (!selectedGroup) return
+    if (selectedGroup) {
+      setMessages(sampleMessages)
+    }
+  }, [selectedGroup])
 
-    const unsubscribe = subscribeToGroupMessages(selectedGroup.id, (messages) => {
-      setMessages(messages)
-      // Mark messages as read
-      if (user?.uid) {
-        markMessagesAsRead(selectedGroup.id, user.uid)
-      }
-    })
-
-    return () => unsubscribe()
-  }, [selectedGroup, user?.uid])
-
-  // Auto scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    scrollToBottom()
   }, [messages])
 
-  // Initialize calling service
-  useEffect(() => {
-    if (true) { // Temporarily disabled authentication
-      // Set up call state callback
-      callingService.setCallStateCallback((state) => {
-        setCallState(state)
-      })
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
-      // Set up incoming call callback
-      callingService.setIncomingCallCallback((call) => {
-        setIncomingCall(call)
-        setShowCallNotification(true)
-      })
-
-      // Initialize calling service
-      callingService.initializeCall(
-        user.uid,
-        user.displayName || user.email || 'Unknown User'
-      )
-    }
-
-    // Cleanup on unmount
-    return () => {
-      callingService.disconnect()
-    }
-  }, [user])
-
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedGroup || !user) return
-
-    try {
-      await sendMessage({
-        groupId: selectedGroup.id,
-        content: newMessage,
-        sender: {
-          id: user.uid,
-          name: user.displayName || user.email || 'Unknown User',
-          role: 'user'
-        },
-        type: 'text',
-        isRead: false
-      })
+  const handleSendMessage = () => {
+    if (newMessage.trim() && selectedGroup) {
+      const message: Message = {
+        id: Date.now().toString(),
+        text: newMessage,
+        sender: 'You',
+        timestamp: new Date(),
+        type: 'text'
+      }
+      setMessages(prev => [...prev, message])
       setNewMessage('')
       setIsTyping(false)
-    } catch (error) {
-      console.error('Error sending message:', error)
     }
   }
 
-  const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNewMessage(e.target.value)
-    
-    if (!isTyping && e.target.value.trim()) {
-      setIsTyping(true)
-      // In a real implementation, you would send typing status to other users
-      // This would typically be done through a separate Firestore collection or WebSocket
-    } else if (isTyping && !e.target.value.trim()) {
-      setIsTyping(false)
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
     }
   }
 
-  const handleCreateGroup = async () => {
-    if (!newGroupName.trim() || selectedUsers.length === 0 || !user) return
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file && selectedGroup) {
+      const message: Message = {
+        id: Date.now().toString(),
+        text: `File: ${file.name}`,
+        sender: 'You',
+        timestamp: new Date(),
+        type: 'file',
+        fileName: file.name,
+        fileUrl: URL.createObjectURL(file)
+      }
+      setMessages(prev => [...prev, message])
+    }
+  }
 
-    try {
-      const groupId = await createChatGroup({
+  const handleCreateGroup = () => {
+    if (newGroupName.trim() && selectedMembers.length > 0) {
+      const newGroup: ChatGroup = {
+        id: Date.now().toString(),
         name: newGroupName,
-        description: newGroupDescription,
-        type: 'permanent',
-        members: [user.uid, ...selectedUsers],
-        createdBy: user.uid
-      })
-      
+        type: 'group',
+        members: selectedMembers,
+        unreadCount: 0
+      }
+      setGroups(prev => [newGroup, ...prev])
       setNewGroupName('')
-      setNewGroupDescription('')
-      setSelectedUsers([])
+      setSelectedMembers([])
       setShowCreateGroup(false)
-      
-      // Select the newly created group
-      const newGroup = groups.find(g => g.id === groupId)
-      if (newGroup) {
-        setSelectedGroup(newGroup)
+      setSelectedGroup(newGroup)
+    }
+  }
+
+  const handleStartDirectChat = (employee: Employee) => {
+    // Check if direct chat already exists
+    const existingChat = groups.find(group => 
+      group.type === 'direct' && group.members.includes(employee.name)
+    )
+    
+    if (existingChat) {
+      setSelectedGroup(existingChat)
+    } else {
+      const newDirectChat: ChatGroup = {
+        id: Date.now().toString(),
+        name: employee.name,
+        type: 'direct',
+        members: [employee.name],
+        unreadCount: 0
       }
-    } catch (error) {
-      console.error('Error creating group:', error)
+      setGroups(prev => [newDirectChat, ...prev])
+      setSelectedGroup(newDirectChat)
     }
+    setShowEmployeeList(false)
   }
 
-  const handleOpenGroupSettings = () => {
-    if (selectedGroup) {
-      setEditingGroupName(selectedGroup.name)
-      setEditingGroupDescription(selectedGroup.description || '')
-      setShowGroupSettings(true)
-    }
-  }
-
-  const handleUpdateGroupSettings = async () => {
-    if (!selectedGroup || !editingGroupName.trim()) return
-
-    try {
-      await updateChatGroup(selectedGroup.id, {
-        name: editingGroupName,
-        description: editingGroupDescription
-      })
-      
-      setShowGroupSettings(false)
-      setEditingGroupName('')
-      setEditingGroupDescription('')
-    } catch (error) {
-      console.error('Error updating group settings:', error)
-    }
-  }
-
-  const handleDeleteGroup = async () => {
-    if (!selectedGroup) return
-
-    try {
-      await deleteChatGroup(selectedGroup.id)
-      setShowDeleteConfirm(false)
-      setSelectedGroup(null)
-    } catch (error) {
-      console.error('Error deleting group:', error)
-    }
-  }
-
-  const handleStartCall = async (type: 'audio' | 'video') => {
-    if (!selectedGroup || !user) return
-
-    try {
-      console.log(`Starting ${type} call for group: ${selectedGroup.name}`)
-      
-      // Initialize calling service
-      await callingService.initializeCall(
-        user.uid, 
-        user.displayName || user.email || 'Unknown User'
-      )
-
-      // Start the call
-      const participants = [user.uid, ...selectedGroup.members.filter(id => id !== user.uid)]
-      await callingService.startCall(type, participants, selectedGroup.id)
-      
-    } catch (error) {
-      console.error('Error starting call:', error)
-      alert('Failed to start call. Please check your microphone and camera permissions.')
-    }
-  }
-
-  const handleEndCall = () => {
-    console.log('Ending call')
-    callingService.endCall()
-  }
-
-  const handleJoinCall = async () => {
-    if (!user || !incomingCall) return
-    
-    try {
-      console.log('Joining existing call')
-      
-      // Initialize calling service
-      await callingService.initializeCall(
-        user.uid, 
-        user.displayName || user.email || 'Unknown User'
-      )
-
-      // Join the call
-      await callingService.joinCall(
-        `call_${Date.now()}`, // In real app, this would be the actual call ID
-        user.uid,
-        user.displayName || user.email || 'Unknown User'
-      )
-      
-    } catch (error) {
-      console.error('Error joining call:', error)
-      alert('Failed to join call. Please check your microphone and camera permissions.')
-    }
-  }
-
-  const handleAcceptCall = async () => {
-    if (!incomingCall || !user) return
-    
-    try {
-      // Initialize calling service
-      await callingService.initializeCall(
-        user.uid, 
-        user.displayName || user.email || 'Unknown User'
-      )
-
-      // Accept the call
-      callingService.acceptCall(incomingCall.caller, {})
-      
-      setShowCallNotification(false)
-      setIncomingCall(null)
-    } catch (error) {
-      console.error('Error accepting call:', error)
-      alert('Failed to accept call.')
-    }
-  }
-
-  const handleRejectCall = () => {
-    if (!incomingCall) return
-    
-    callingService.rejectCall(incomingCall.caller)
-    setShowCallNotification(false)
-    setIncomingCall(null)
-  }
-
-  const quickReplies = [
-    "Thanks!",
-    "Got it!",
-    "Will do!",
-    "On it!",
-    "Perfect!",
-    "👍",
-    "Great!",
-    "Noted!"
-  ]
-
-  const handleQuickReply = (reply: string) => {
-    setNewMessage(reply)
-    setShowQuickReplies(false)
-  }
-
-  const handleReaction = async (messageId: string, emoji: string) => {
-    if (!user) return
-
-    try {
-      const message = messages.find(m => m.id === messageId)
-      if (!message) return
-
-      // Check if user already reacted with this emoji
-      const hasReacted = message.reactions?.some(reaction => 
-        reaction.emoji === emoji && reaction.userId === user.uid
-      )
-
-      if (hasReacted) {
-        // Remove reaction
-        await removeMessageReaction(messageId, emoji, user.uid)
-      } else {
-        // Add reaction
-        await addMessageReaction(
-          messageId, 
-          emoji, 
-          user.uid, 
-          user.displayName || user.email || 'Unknown User'
-        )
-      }
-    } catch (error) {
-      console.error('Error handling reaction:', error)
-    }
-  }
-
-  const getReactionDisplay = (message: ChatMessage) => {
-    if (!message.reactions || message.reactions.length === 0) return null
-    
-    const summary = getReactionSummary(message.reactions)
-    const reactionEntries = Object.entries(summary)
-    
-    return (
-      <div className="flex flex-wrap gap-1 mt-1">
-        {reactionEntries.map(([emoji, data]) => (
-          <div
-            key={emoji}
-            className="flex items-center space-x-1 bg-slate-100 rounded-full px-2 py-1 text-xs cursor-pointer hover:bg-slate-200"
-            title={`${data.users.join(', ')} reacted with ${emoji}`}
-          >
-            <span>{emoji}</span>
-            <span className="text-slate-600">{data.count}</span>
-          </div>
-        ))}
-      </div>
+  const toggleMemberSelection = (memberName: string) => {
+    setSelectedMembers(prev => 
+      prev.includes(memberName) 
+        ? prev.filter(name => name !== memberName)
+        : [...prev, memberName]
     )
   }
 
-  const hasUserReacted = (message: ChatMessage, emoji: string) => {
-    if (!user || !message.reactions) return false
-    return message.reactions.some(reaction => 
-      reaction.emoji === emoji && reaction.userId === user.uid
-    )
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file || !selectedGroup || !user) return
-
-    // For now, we'll just send a text message about the file
-    // In a real implementation, you'd upload to Firebase Storage
-    const message = `Sent file: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
-    setNewMessage(message)
+  const formatDate = (date: Date) => {
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays > 1) return date.toLocaleDateString()
+    return formatTime(date)
   }
 
   const filteredGroups = groups.filter(group =>
@@ -501,740 +235,427 @@ export default function ChatPage() {
     return name.split(' ').map(n => n[0]).join('').toUpperCase()
   }
 
-  const formatTime = (timestamp: any) => {
-    if (!timestamp) return ''
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  }
-
-  const formatDate = (timestamp: any) => {
-    if (!timestamp) return ''
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
-    const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today'
-    } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday'
-    } else {
-      return date.toLocaleDateString()
-    }
-  }
-
   return (
     <div className="flex h-screen bg-slate-50">
-      {/* Sidebar */}
-      <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => window.history.back()}
-                className="hover:bg-slate-100"
-                title="Go back"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <h1 className="text-xl font-semibold text-slate-900">Messages</h1>
-            </div>
-            <Button
-              onClick={() => {
-                console.log('Create group button clicked')
-                console.log('Current allUsers:', allUsers)
-                setShowCreateGroup(true)
-              }}
-              size="sm"
-              className="bg-orange-500 hover:bg-orange-600"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-          
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-            <Input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search conversations..."
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {/* Groups List */}
-        <div className="flex-1 overflow-y-auto">
-          {filteredGroups.map((group) => (
-            <div
-              key={group.id}
-              onClick={() => setSelectedGroup(group)}
-              className={`p-4 border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${
-                selectedGroup?.id === group.id ? 'bg-orange-50 border-orange-200' : ''
-              }`}
-            >
-              <div className="flex items-center space-x-3">
-                <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
-                  <span className="text-orange-600 font-semibold">
-                    {getInitials(group.name)}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-slate-900 truncate">
-                      {group.name}
-                    </h3>
-                    {group.unreadCount > 0 && (
-                      <Badge variant="destructive" className="text-xs">
-                        {group.unreadCount}
-                      </Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 truncate">
-                    {group.lastMessage?.content || 'No messages yet'}
-                  </p>
-                  <p className="text-xs text-slate-400">
-                    {group.lastMessage ? formatTime(group.lastMessage.timestamp) : ''}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-          
-          {filteredGroups.length === 0 && (
-            <div className="p-8 text-center text-slate-500">
-              <MessageCircle className="h-12 w-12 mx-auto mb-2 text-slate-300" />
-              <p>No conversations found</p>
-            </div>
-          )}
-        </div>
-
-        {/* Online Users */}
-        <div className="p-4 border-t border-slate-200">
-          <h3 className="text-sm font-medium text-slate-700 mb-2">Online ({onlineUsers.length})</h3>
-          <div className="space-y-2">
-            {onlineUsers.slice(0, 5).map((user) => (
-              <div key={user.id} className="flex items-center space-x-2">
-                <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center">
-                  <span className="text-green-600 text-xs font-semibold">
-                    {getInitials(user.name)}
-                  </span>
-                </div>
-                <span className="text-xs text-slate-600 truncate">{user.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Chat Area */}
+      <Sidebar />
       <div className="flex-1 flex flex-col">
-        {selectedGroup ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-slate-200 bg-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center">
-                    <span className="text-orange-600 font-semibold">
-                      {getInitials(selectedGroup.name)}
-                    </span>
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold text-slate-900">{selectedGroup.name}</h2>
-                    <p className="text-sm text-slate-500">
-                      {selectedGroup.members.length} members • {selectedGroup.type}
-                    </p>
-                    {callState.isActive && (
-                      <div className="flex items-center space-x-2 mt-1">
-                        <div className="flex items-center space-x-1">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                          <span className="text-xs text-green-600 font-medium">
-                            {callState.type === 'video' ? 'Video Call' : 'Audio Call'} Active
-                          </span>
-                        </div>
-                        <span className="text-xs text-slate-400">
-                          {callState.participants.length} participants
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  {!callState.isActive ? (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleStartCall('audio')}
-                        className="hover:bg-green-50 hover:text-green-600"
-                        title="Start Audio Call"
-                      >
-                        <Phone className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleStartCall('video')}
-                        className="hover:bg-blue-50 hover:text-blue-600"
-                        title="Start Video Call"
-                      >
-                        <VideoCall className="h-4 w-4" />
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => callingService.toggleAudio()}
-                        className={callState.localAudioEnabled ? "hover:bg-green-50 hover:text-green-600" : "bg-red-50 text-red-600"}
-                        title={callState.localAudioEnabled ? "Mute Audio" : "Unmute Audio"}
-                      >
-                        {callState.localAudioEnabled ? <Phone className="h-4 w-4" /> : <Phone className="h-4 w-4" />}
-                      </Button>
-                      {callState.type === 'video' && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => callingService.toggleVideo()}
-                          className={callState.localVideoEnabled ? "hover:bg-blue-50 hover:text-blue-600" : "bg-red-50 text-red-600"}
-                          title={callState.localVideoEnabled ? "Turn Off Video" : "Turn On Video"}
-                        >
-                          <VideoCall className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button 
-                        variant="destructive" 
-                        size="sm"
-                        onClick={handleEndCall}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        End Call
-                      </Button>
-                    </>
-                  )}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setShowMemberManagement(true)}>
-                        <Users className="h-4 w-4 mr-2" />
-                        Manage Members
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleOpenGroupSettings}>
-                        <Settings className="h-4 w-4 mr-2" />
-                        Group Settings
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete Group
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+        <Header />
+        
+        <div className="flex-1 flex">
+          {/* Chat Groups Sidebar */}
+          <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
+            {/* Header with Create Group and New Chat buttons */}
+            <div className="p-4 border-b border-slate-200">
+              <div className="flex space-x-2 mb-3">
+                <button
+                  onClick={() => setShowCreateGroup(true)}
+                  className="flex-1 bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                >
+                  Create Group
+                </button>
+                <button
+                  onClick={() => setShowEmployeeList(true)}
+                  className="flex-1 bg-green-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
+                >
+                  New Chat
+                </button>
+              </div>
+              
+              {/* Search */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search conversations..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <svg
+                  className="absolute left-3 top-2.5 h-5 w-5 text-slate-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
               </div>
             </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map((message, index) => {
-                const isOwnMessage = message.sender.id === user?.uid
-                const showDate = index === 0 || 
-                  formatDate(message.timestamp) !== formatDate(messages[index - 1]?.timestamp)
-                
-                return (
-                  <div key={message.id}>
-                    {showDate && (
-                      <div className="text-center mb-4">
-                        <Badge variant="secondary" className="text-xs">
-                          {formatDate(message.timestamp)}
-                        </Badge>
-                      </div>
-                    )}
-                    
-                    <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-xs lg:max-w-md ${isOwnMessage ? 'order-2' : 'order-1'}`}>
-                        {!isOwnMessage && (
-                          <div className="flex items-center space-x-2 mb-1">
-                            <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center">
-                              <span className="text-slate-600 text-xs font-semibold">
-                                {getInitials(message.sender.name)}
-                              </span>
-                            </div>
-                            <span className="text-xs text-slate-500">{message.sender.name}</span>
-                          </div>
+            {/* Groups List */}
+            <div className="flex-1 overflow-y-auto">
+              {filteredGroups.map((group) => (
+                <div
+                  key={group.id}
+                  onClick={() => setSelectedGroup(group)}
+                  className={`p-4 border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors ${
+                    selectedGroup?.id === group.id ? 'bg-blue-50 border-blue-200' : ''
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold text-lg">
+                        {getInitials(group.name)}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-slate-900 truncate">
+                          {group.name}
+                        </h3>
+                        {group.unreadCount > 0 && (
+                          <span className="bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {group.unreadCount}
+                          </span>
                         )}
-                        
-                        <div className={`p-3 rounded-lg ${
-                          isOwnMessage 
-                            ? 'bg-orange-500 text-white' 
-                            : 'bg-white border border-slate-200'
-                        }`}>
-                          <p className="text-sm">{message.content}</p>
-                          
-                          {/* Reaction Display */}
-                          {getReactionDisplay(message)}
-                          
-                          <div className={`flex items-center justify-between mt-2 ${
-                            isOwnMessage ? 'text-orange-100' : 'text-slate-400'
-                          }`}>
-                            <div className="flex items-center space-x-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`h-6 w-6 p-0 hover:bg-slate-100 ${
-                                  hasUserReacted(message, '👍') ? 'bg-blue-100 text-blue-600' : ''
-                                }`}
-                                title="React with 👍"
-                                onClick={() => handleReaction(message.id, '👍')}
-                              >
-                                <span className="text-xs">👍</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`h-6 w-6 p-0 hover:bg-slate-100 ${
-                                  hasUserReacted(message, '❤️') ? 'bg-red-100 text-red-600' : ''
-                                }`}
-                                title="React with ❤️"
-                                onClick={() => handleReaction(message.id, '❤️')}
-                              >
-                                <span className="text-xs">❤️</span>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className={`h-6 w-6 p-0 hover:bg-slate-100 ${
-                                  hasUserReacted(message, '😊') ? 'bg-yellow-100 text-yellow-600' : ''
-                                }`}
-                                title="React with 😊"
-                                onClick={() => handleReaction(message.id, '😊')}
-                              >
-                                <span className="text-xs">😊</span>
-                              </Button>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <span className="text-xs">{formatTime(message.timestamp)}</span>
-                              {isOwnMessage && (
-                                message.isRead ? (
-                                  <CheckCheck className="h-3 w-3" />
-                                ) : (
-                                  <Check className="h-3 w-3" />
-                                )
-                              )}
-                            </div>
-                          </div>
-                        </div>
                       </div>
+                      {group.lastMessage && (
+                        <p className="text-sm text-slate-500 truncate">
+                          {group.lastMessage}
+                        </p>
+                      )}
+                      {group.lastMessageTime && (
+                        <p className="text-xs text-slate-400">
+                          {formatDate(group.lastMessageTime)}
+                        </p>
+                      )}
                     </div>
                   </div>
-                )
-              })}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Message Input */}
-            <div className="p-4 border-t border-slate-200 bg-white">
-              {typingUsers.length > 0 && (
-                <div className="mb-2 px-3 py-1 bg-slate-50 rounded-lg">
-                  <span className="text-xs text-slate-500">
-                    {typingUsers.length === 1 
-                      ? `${typingUsers[0]} is typing...`
-                      : `${typingUsers.length} people are typing...`
-                    }
-                  </span>
                 </div>
-              )}
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Attach file"
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowQuickReplies(!showQuickReplies)}
-                  title="Quick replies"
-                >
-                  <span className="text-sm">⚡</span>
-                </Button>
-                <Input
-                  value={newMessage}
-                  onChange={handleTyping}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type a message..."
-                  className="flex-1"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  className="bg-orange-500 hover:bg-orange-600"
-                  title="Send message"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {showQuickReplies && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {quickReplies.map((reply, index) => (
-                    <Button
-                      key={index}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleQuickReply(reply)}
-                      className="text-xs"
-                    >
-                      {reply}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              
-              <input
-                ref={fileInputRef}
-                type="file"
-                onChange={handleFileUpload}
-                className="hidden"
-                accept="image/*,video/*,.pdf,.doc,.docx"
-              />
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <MessageCircle className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">Select a conversation</h3>
-              <p className="text-slate-500">Choose a conversation from the sidebar to start messaging</p>
+              ))}
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Create Group Modal */}
-      <Dialog open={showCreateGroup} onOpenChange={(open) => {
-        console.log('Dialog open state changed:', open)
-        setShowCreateGroup(open)
-        if (open) {
-          // Reset filters when dialog opens
-          setSelectedDepartment('all')
-          setSelectedUsers([])
-        }
-      }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Create New Group</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700">Group Name</label>
-              <Input
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                placeholder="Enter group name"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700">Description (Optional)</label>
-              <Input
-                value={newGroupDescription}
-                onChange={(e) => setNewGroupDescription(e.target.value)}
-                placeholder="Enter group description"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700">Filter by Department</label>
-              <Select value={selectedDepartment} onValueChange={(value) => {
-                console.log('Department selection changed:', value)
-                setSelectedDepartment(value)
-              }}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Employees</SelectItem>
-                  {departments.map((dept) => (
-                    <SelectItem key={dept.id} value={dept.id}>
-                      {dept.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {selectedDepartment !== 'all' && (
-                <p className="text-xs text-slate-500 mt-1">
-                  Showing employees from: {departments.find(d => d.id === selectedDepartment)?.name}
-                </p>
-              )}
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700">Add Members</label>
-              <div className="max-h-32 overflow-y-auto space-y-2 mt-2">
-                {filteredUsers.length === 0 ? (
-                  <div className="text-center py-4 text-slate-500">
-                    <p className="text-sm">
-                      {selectedDepartment === 'all' 
-                        ? 'No users available' 
-                        : 'No users in selected department'
-                      }
-                    </p>
-                    <p className="text-xs">
-                      {selectedDepartment === 'all' 
-                        ? 'Add employees in the HR section first' 
-                        : 'Try selecting a different department or all employees'
-                      }
-                    </p>
+          {/* Chat Messages Area */}
+          <div className="flex-1 flex flex-col">
+            {selectedGroup ? (
+              <>
+                {/* Chat Header */}
+                <div className="p-4 border-b border-slate-200 bg-white">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                        <span className="text-blue-600 font-semibold">
+                          {getInitials(selectedGroup.name)}
+                        </span>
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-slate-900">
+                          {selectedGroup.name}
+                        </h2>
+                        <p className="text-sm text-slate-500">
+                          {selectedGroup.members.length} members • {selectedGroup.type}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                      </button>
+                      <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                      <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                ) : (
-                  filteredUsers
-                    .filter(u => u.id !== user?.uid)
-                    .map((user) => (
+                </div>
+
+                {/* Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.sender === 'You' ? 'justify-end' : 'justify-start'}`}
+                    >
                       <div
-                        key={user.id}
-                        className={`flex items-center space-x-2 p-2 rounded cursor-pointer ${
-                          selectedUsers.includes(user.id) 
-                            ? 'bg-orange-50 border border-orange-200' 
-                            : 'hover:bg-slate-50'
+                        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          message.sender === 'You'
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-white border border-slate-200 text-slate-900'
                         }`}
-                        onClick={() => {
-                          setSelectedUsers(prev => 
-                            prev.includes(user.id) 
-                              ? prev.filter(id => id !== user.id)
-                              : [...prev, user.id]
-                          )
-                        }}
                       >
-                        <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center">
-                          <span className="text-slate-600 text-xs font-semibold">
-                            {getInitials(user.name)}
-                          </span>
-                        </div>
-                        <span className="text-sm">{user.name}</span>
-                        {(user as any).department && (
-                          <span className="text-xs text-slate-500 ml-auto">
-                            {(user as any).department}
-                          </span>
+                        {message.type === 'file' ? (
+                          <div className="flex items-center space-x-2">
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span className="text-sm font-medium">{message.fileName}</span>
+                          </div>
+                        ) : (
+                          <p className="text-sm">{message.text}</p>
                         )}
-                        {selectedUsers.includes(user.id) && (
-                          <Check className="h-4 w-4 text-orange-500 ml-auto" />
-                        )}
+                        <p className={`text-xs mt-1 ${
+                          message.sender === 'You' ? 'text-blue-100' : 'text-slate-500'
+                        }`}>
+                          {formatTime(message.timestamp)}
+                        </p>
                       </div>
-                    ))
-                )}
-              </div>
-            </div>
-            
-            {selectedUsers.length > 0 && (
-              <div className="mt-4 p-3 bg-orange-50 rounded-lg">
-                <p className="text-sm font-medium text-orange-800 mb-2">
-                  Selected Members ({selectedUsers.length})
-                </p>
-                <div className="space-y-1">
-                  {selectedUsers.map(userId => {
-                    const user = filteredUsers.find(u => u.id === userId)
-                    return user ? (
-                      <div key={userId} className="flex items-center space-x-2 text-sm">
-                        <div className="h-4 w-4 rounded-full bg-orange-200 flex items-center justify-center">
-                          <span className="text-orange-600 text-xs font-semibold">
-                            {getInitials(user.name)}
-                          </span>
-                        </div>
-                        <span className="text-orange-700">{user.name}</span>
-                      </div>
-                    ) : null
-                  })}
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Message Input */}
+                <div className="p-4 border-t border-slate-200 bg-white">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                    <button
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </button>
+                    <div className="flex-1 relative">
+                      <textarea
+                        value={newMessage}
+                        onChange={(e) => {
+                          setNewMessage(e.target.value)
+                          setIsTyping(e.target.value.length > 0)
+                        }}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Type a message..."
+                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        rows={1}
+                      />
+                    </div>
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                    </button>
+                  </div>
+                  {isTyping && (
+                    <p className="text-xs text-slate-500 mt-2">Typing...</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                    />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-slate-900">No conversation selected</h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Choose a conversation from the sidebar to start chatting.
+                  </p>
                 </div>
               </div>
             )}
           </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowCreateGroup(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                console.log('Create Group button clicked')
-                console.log('Group name:', newGroupName)
-                console.log('Selected users:', selectedUsers)
-                console.log('Filtered users:', filteredUsers)
-                handleCreateGroup()
-              }}
-              disabled={!newGroupName.trim() || selectedUsers.length === 0}
-              className="bg-orange-500 hover:bg-orange-600"
-            >
-              Create Group
-              {!newGroupName.trim() && <span className="ml-2 text-xs">(Enter group name)</span>}
-              {newGroupName.trim() && selectedUsers.length === 0 && <span className="ml-2 text-xs">(Select members)</span>}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </div>
 
-      {/* Member Management Modal */}
-      {selectedGroup && (
-        <MemberManagementModal
-          isOpen={showMemberManagement}
-          onClose={() => setShowMemberManagement(false)}
-          groupId={selectedGroup.id}
-          currentMembers={selectedGroup.members}
-          groupName={selectedGroup.name}
-        />
-      )}
-
-      {/* Group Settings Modal */}
-      <Dialog open={showGroupSettings} onOpenChange={setShowGroupSettings}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Group Settings</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-slate-700">Group Name</label>
-              <Input
-                value={editingGroupName}
-                onChange={(e) => setEditingGroupName(e.target.value)}
-                placeholder="Enter group name"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium text-slate-700">Description (Optional)</label>
-              <Input
-                value={editingGroupDescription}
-                onChange={(e) => setEditingGroupDescription(e.target.value)}
-                placeholder="Enter group description"
-              />
-            </div>
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowGroupSettings(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleUpdateGroupSettings}
-              disabled={!editingGroupName.trim()}
-              className="bg-orange-500 hover:bg-orange-600"
-            >
-              Save Changes
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Modal */}
-      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Delete Group</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center">
-                <Trash2 className="h-6 w-6 text-red-600" />
+        {/* Create Group Modal */}
+        {showCreateGroup && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-slate-900">Create New Group</h2>
+                <button
+                  onClick={() => setShowCreateGroup(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Delete "{selectedGroup?.name}"?</h3>
-                <p className="text-sm text-slate-500">
-                  This action cannot be undone. All messages and member data will be permanently deleted.
-                </p>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Group Name
+                  </label>
+                  <input
+                    type="text"
+                    value={newGroupName}
+                    onChange={(e) => setNewGroupName(e.target.value)}
+                    placeholder="Enter group name"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Select Members
+                  </label>
+                  <div className="max-h-48 overflow-y-auto border border-slate-300 rounded-lg p-2">
+                    {employees.map((employee) => (
+                      <label key={employee.id} className="flex items-center space-x-2 p-2 hover:bg-slate-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedMembers.includes(employee.name)}
+                          onChange={() => toggleMemberSelection(employee.name)}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{employee.name}</p>
+                          <p className="text-xs text-slate-500">{employee.position} • {employee.department}</p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex space-x-3 pt-4">
+                  <button
+                    onClick={() => setShowCreateGroup(false)}
+                    className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateGroup}
+                    disabled={!newGroupName.trim() || selectedMembers.length === 0}
+                    className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Create Group
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleDeleteGroup}
-              variant="destructive"
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete Group
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        )}
 
-      {/* Incoming Call Modal */}
-      <Dialog open={showCallNotification} onOpenChange={setShowCallNotification}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Incoming Call</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                {incomingCall?.type === 'video' ? (
-                  <VideoCall className="h-6 w-6 text-green-600" />
-                ) : (
-                  <Phone className="h-6 w-6 text-green-600" />
+        {/* Employee List Modal */}
+        {showEmployeeList && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-slate-900">Start New Chat</h2>
+                <button
+                  onClick={() => setShowEmployeeList(false)}
+                  className="text-slate-400 hover:text-slate-600"
+                >
+                  <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {/* Search Tab */}
+              <div className="mb-4">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search employees..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <svg
+                    className="absolute left-3 top-2.5 h-5 w-5 text-slate-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                {employees
+                  .filter(employee => 
+                    employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    employee.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    employee.position.toLowerCase().includes(searchQuery.toLowerCase())
+                  )
+                  .map((employee) => (
+                  <div
+                    key={employee.id}
+                    onClick={() => handleStartDirectChat(employee)}
+                    className="flex items-center space-x-3 p-3 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors"
+                  >
+                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                      <span className="text-blue-600 font-semibold">
+                        {getInitials(employee.name)}
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-slate-900">{employee.name}</p>
+                      <p className="text-xs text-slate-500">{employee.position} • {employee.department}</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* No results message */}
+                {employees.filter(employee => 
+                  employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  employee.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  employee.position.toLowerCase().includes(searchQuery.toLowerCase())
+                ).length === 0 && searchQuery && (
+                  <div className="text-center py-8">
+                    <svg
+                      className="mx-auto h-12 w-12 text-slate-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33"
+                      />
+                    </svg>
+                    <h3 className="mt-2 text-sm font-medium text-slate-900">No employees found</h3>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Try searching with a different term.
+                    </p>
+                  </div>
                 )}
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  {incomingCall?.type === 'video' ? 'Video Call' : 'Audio Call'}
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Incoming call from {incomingCall?.callerName || incomingCall?.caller}
-                </p>
-              </div>
             </div>
           </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={handleRejectCall}
-              className="bg-red-50 text-red-600 hover:bg-red-100"
-            >
-              Decline
-            </Button>
-            <Button
-              onClick={handleAcceptCall}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Accept
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Video Call Interface */}
-      {callState.isActive && callState.type === 'video' && (
-        <VideoCallInterface
-          participants={callState.participants}
-          localAudioEnabled={callState.localAudioEnabled}
-          localVideoEnabled={callState.localVideoEnabled}
-          onToggleAudio={() => callingService.toggleAudio()}
-          onToggleVideo={() => callingService.toggleVideo()}
-          onEndCall={handleEndCall}
-        />
-      )}
+        )}
+      </div>
     </div>
   )
-} 
+}

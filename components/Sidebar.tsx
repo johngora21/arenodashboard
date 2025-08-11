@@ -55,6 +55,7 @@ const navigation = [
   { id: 'tasks', name: 'Tasks', href: '/tasks', icon: CheckSquare },
   { id: 'reports', name: 'Reports', href: '/reports', icon: BarChart3 },
   { id: 'events', name: 'Events', href: '/events', icon: Calendar },
+  { id: 'settings', name: 'Settings', href: '/settings', icon: Settings },
 ]
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -115,12 +116,10 @@ export default function Sidebar() {
           {/* Header */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-slate-800">
             <div className="flex items-center space-x-3">
-              <div className="bg-white p-1 rounded-lg shadow-lg flex items-center justify-center">
-                <Image src="/images/IrisLogo.png" alt="iRis Logo" width={40} height={40} className="object-contain" />
-              </div>
+              <Image src="/images/iRis-logo.png" alt="iRis Logo" width={60} height={60} className="object-contain" />
               <div>
                 <h1 className="text-lg font-bold text-white">iRis</h1>
-                <p className="text-xs text-slate-400">Management System</p>
+                <p className="text-xs text-slate-400">Technologies</p>
               </div>
             </div>
             <button

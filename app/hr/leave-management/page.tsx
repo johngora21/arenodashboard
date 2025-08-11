@@ -26,8 +26,8 @@ import {
   UserPlus,
   Settings,
   BarChart3,
-  Vacation,
-  Sick,
+  Sun,
+  Activity,
   Home,
   Plane,
   Heart,
@@ -231,10 +231,10 @@ export default function LeaveManagementPage() {
 
   const getLeaveTypeIcon = (type: string) => {
     switch (type) {
-      case "vacation":
-        return <Vacation className="h-4 w-4" />
-      case "sick":
-        return <Sick className="h-4 w-4" />
+          case "vacation":
+      return <Sun className="h-4 w-4" />
+    case "sick":
+      return <Activity className="h-4 w-4" />
       case "personal":
         return <Home className="h-4 w-4" />
       case "maternity":

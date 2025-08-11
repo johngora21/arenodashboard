@@ -1,1 +1,504 @@
-"use client"; import { useState } from "react"; import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; import { Button } from "@/components/ui/button"; import { Badge } from "@/components/ui/badge"; import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; import { Settings, Building, Globe, Mail, Shield, Zap, FileText, Palette, Users, Calendar, DollarSign, MapPin, Phone, Clock, Eye, Edit, Trash2, Plus, Save, Upload, Download } from "lucide-react"; import Sidebar from "@/components/Sidebar"; import Header from "@/components/Header"; export default function SettingsPage() { return ( <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex"> <Sidebar /> <div className="flex-1 flex flex-col lg:ml-0"> <Header /> <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100"> <div className="mb-8"> <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"> <div> <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Settings</h1> <p className="text-slate-600 mt-1 text-base">Configure system settings and preferences</p> </div> <div className="flex space-x-3"> <Button variant="outline" className="bg-white hover:bg-slate-50"> <Download className="h-4 w-4 mr-2" /> Export </Button> <Button className="bg-orange-500 hover:bg-orange-600"> <Save className="h-4 w-4 mr-2" /> Save All </Button> </div> </div> </div> <Tabs defaultValue="business" className="space-y-6"> <TabsList className="grid w-full grid-cols-4 bg-white rounded-xl p-1 shadow-sm"> <TabsTrigger value="business">Business</TabsTrigger> <TabsTrigger value="system">System</TabsTrigger> <TabsTrigger value="integrations">Integrations</TabsTrigger> <TabsTrigger value="templates">Templates</TabsTrigger> </TabsList> <TabsContent value="business" className="space-y-6"> <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Business Settings</CardTitle> </CardHeader> <CardContent> <div className="space-y-4"> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Company Logo</label> <div className="flex items-center space-x-3"> <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold"> iR </div> <Button variant="outline" size="sm"> <Upload className="h-4 w-4 mr-2" /> Upload </Button> </div> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Company Name</label> <input type="text" defaultValue="iRis Company Management" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Theme</label> <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"> <option>Light Theme</option> <option>Dark Theme</option> <option>Auto</option> </select> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Language</label> <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"> <option>English</option> <option>Swahili</option> <option>French</option> </select> </div> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Company Information</CardTitle> </CardHeader> <CardContent> <div className="space-y-4"> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Address</label> <textarea defaultValue="123 Business Street, Dar es Salaam, Tanzania" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Contact Email</label> <input type="email" defaultValue="info@iriscompany.com" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Phone Number</label> <input type="tel" defaultValue="+255 123 456 789" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Timezone</label> <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"> <option>Africa/Dar_es_Salaam (GMT+3)</option> <option>UTC (GMT+0)</option> <option>America/New_York (GMT-5)</option> </select> </div> </div> </CardContent> </Card> </div> </TabsContent> <TabsContent value="system" className="space-y-6"> <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>System Settings</CardTitle> </CardHeader> <CardContent> <div className="space-y-4"> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Currency</label> <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"> <option>Tanzanian Shilling (TZS)</option> <option>US Dollar (USD)</option> <option>Euro (EUR)</option> </select> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Date Format</label> <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"> <option>DD/MM/YYYY</option> <option>MM/DD/YYYY</option> <option>YYYY-MM-DD</option> </select> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Time Format</label> <select className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"> <option>12-hour</option> <option>24-hour</option> </select> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Employee Prefix</label> <input type="text" defaultValue="EMP" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Email Settings</CardTitle> </CardHeader> <CardContent> <div className="space-y-4"> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">SMTP Server</label> <input type="text" defaultValue="smtp.gmail.com" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">SMTP Port</label> <input type="number" defaultValue="587" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Email Username</label> <input type="email" defaultValue="noreply@iriscompany.com" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Email Password</label> <input type="password" defaultValue="••••••••" className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" /> </div> <Button className="w-full bg-blue-500 hover:bg-blue-600"> <Mail className="h-4 w-4 mr-2" /> Test Email </Button> </div> </CardContent> </Card> </div> <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Email Notification Settings</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>System Alerts</span> <Badge className="bg-green-100 text-green-800">Enabled</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>User Registration</span> <Badge className="bg-green-100 text-green-800">Enabled</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Password Reset</span> <Badge className="bg-green-100 text-green-800">Enabled</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Daily Reports</span> <Badge className="bg-yellow-100 text-yellow-800">Disabled</Badge> </div> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>IP Restriction Settings</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>IP Whitelist</span> <Badge className="bg-green-100 text-green-800">Enabled</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>VPN Access</span> <Badge className="bg-yellow-100 text-yellow-800">Restricted</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Geographic Restriction</span> <Badge className="bg-red-100 text-red-800">Disabled</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Session Timeout</span> <Badge className="bg-blue-100 text-blue-800">30 min</Badge> </div> </div> </CardContent> </Card> </div> </TabsContent> <TabsContent value="integrations" className="space-y-6"> <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Zoom Integration</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>Status</span> <Badge className="bg-green-100 text-green-800">Connected</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>API Key</span> <Badge className="bg-blue-100 text-blue-800">Configured</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Webhook</span> <Badge className="bg-green-100 text-green-800">Active</Badge> </div> <Button className="w-full" variant="outline"> <Settings className="h-4 w-4 mr-2" /> Configure </Button> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Slack Integration</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>Status</span> <Badge className="bg-green-100 text-green-800">Connected</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Bot Token</span> <Badge className="bg-blue-100 text-blue-800">Configured</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Channels</span> <Badge className="bg-green-100 text-green-800">3 Active</Badge> </div> <Button className="w-full" variant="outline"> <Settings className="h-4 w-4 mr-2" /> Configure </Button> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Telegram Integration</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>Status</span> <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Bot Token</span> <Badge className="bg-red-100 text-red-800">Not Set</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Chat ID</span> <Badge className="bg-red-100 text-red-800">Not Set</Badge> </div> <Button className="w-full" variant="outline"> <Settings className="h-4 w-4 mr-2" /> Configure </Button> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Twilio Integration</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>Status</span> <Badge className="bg-green-100 text-green-800">Connected</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Account SID</span> <Badge className="bg-blue-100 text-blue-800">Configured</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Auth Token</span> <Badge className="bg-blue-100 text-blue-800">Configured</Badge> </div> <Button className="w-full" variant="outline"> <Settings className="h-4 w-4 mr-2" /> Configure </Button> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Google Calendar</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>Status</span> <Badge className="bg-green-100 text-green-800">Connected</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>API Key</span> <Badge className="bg-blue-100 text-blue-800">Configured</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Sync</span> <Badge className="bg-green-100 text-green-800">Active</Badge> </div> <Button className="w-full" variant="outline"> <Settings className="h-4 w-4 mr-2" /> Configure </Button> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Webhooks</CardTitle> </CardHeader> <CardContent> <div className="space-y-3"> <div className="flex items-center justify-between p-2 border rounded"> <span>Status</span> <Badge className="bg-green-100 text-green-800">Active</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Endpoints</span> <Badge className="bg-blue-100 text-blue-800">5 Configured</Badge> </div> <div className="flex items-center justify-between p-2 border rounded"> <span>Security</span> <Badge className="bg-green-100 text-green-800">Verified</Badge> </div> <Button className="w-full" variant="outline"> <Settings className="h-4 w-4 mr-2" /> Configure </Button> </div> </CardContent> </Card> </div> </TabsContent> <TabsContent value="templates" className="space-y-6"> <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Document Templates</CardTitle> </CardHeader> <CardContent> <div className="space-y-4"> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Offer Letter Template</label> <textarea defaultValue="Dear [Employee Name], We are pleased to offer you the position of [Position] at [Company Name]..." className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows={4} /> <Button variant="outline" size="sm"> <Edit className="h-4 w-4 mr-2" /> Edit </Button> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Joining Letter Template</label> <textarea defaultValue="This letter confirms your joining date of [Date] at [Company Name]..." className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows={4} /> <Button variant="outline" size="sm"> <Edit className="h-4 w-4 mr-2" /> Edit </Button> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Certificate of Experience Template</label> <textarea defaultValue="This is to certify that [Employee Name] has worked with [Company Name]..." className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows={4} /> <Button variant="outline" size="sm"> <Edit className="h-4 w-4 mr-2" /> Edit </Button> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">No Objection Certificate Template</label> <textarea defaultValue="This is to certify that [Company Name] has no objection to [Employee Name]..." className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" rows={4} /> <Button variant="outline" size="sm"> <Edit className="h-4 w-4 mr-2" /> Edit </Button> </div> </div> </CardContent> </Card> <Card className="bg-white shadow-sm"> <CardHeader> <CardTitle>Template Management</CardTitle> </CardHeader> <CardContent> <div className="space-y-4"> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Template Variables</label> <div className="grid grid-cols-2 gap-2 text-sm"> <div className="p-2 bg-slate-100 rounded">[Employee Name]</div> <div className="p-2 bg-slate-100 rounded">[Position]</div> <div className="p-2 bg-slate-100 rounded">[Company Name]</div> <div className="p-2 bg-slate-100 rounded">[Date]</div> <div className="p-2 bg-slate-100 rounded">[Salary]</div> <div className="p-2 bg-slate-100 rounded">[Department]</div> </div> </div> <div className="space-y-2"> <label className="text-sm font-medium text-slate-700">Quick Actions</label> <div className="space-y-2"> <Button className="w-full" variant="outline"> <Download className="h-4 w-4 mr-2" /> Export Templates </Button> <Button className="w-full" variant="outline"> <Upload className="h-4 w-4 mr-2" /> Import Templates </Button> <Button className="w-full" variant="outline"> <Plus className="h-4 w-4 mr-2" /> Create New Template </Button> </div> </div> </div> </CardContent> </Card> </div> </TabsContent> </Tabs> </main> </div> </div> ) }
+'use client'
+
+import { useState } from 'react'
+import Sidebar from '@/components/Sidebar'
+import Header from '@/components/Header'
+import { 
+  User, 
+  Bell, 
+  Shield, 
+  Database, 
+  Mail, 
+  Smartphone, 
+  Globe, 
+  Save,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react'
+
+interface SettingsSection {
+  id: string
+  title: string
+  icon: any
+  description: string
+}
+
+const settingsSections: SettingsSection[] = [
+  {
+    id: 'personal',
+    title: 'Personal Settings',
+    icon: User,
+    description: 'Manage your profile and preferences'
+  },
+  {
+    id: 'notifications',
+    title: 'Notifications',
+    icon: Bell,
+    description: 'Configure notification preferences'
+  },
+  {
+    id: 'security',
+    title: 'Security',
+    icon: Shield,
+    description: 'Password and access control settings'
+  },
+  {
+    id: 'system',
+    title: 'System Settings',
+    icon: Database,
+    description: 'Company and workflow configurations'
+  },
+  {
+    id: 'integrations',
+    title: 'Integrations',
+    icon: Mail,
+    description: 'Email, SMS, and third-party services'
+  }
+]
+
+export default function SettingsPage() {
+  const [activeSection, setActiveSection] = useState('personal')
+  const [showPassword, setShowPassword] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  const handleSave = () => {
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+  }
+
+  const renderPersonalSettings = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            First Name
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            defaultValue="John"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Last Name
+          </label>
+          <input
+            type="text"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            defaultValue="Doe"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email
+          </label>
+          <input
+            type="email"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            defaultValue="john.doe@company.com"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Phone
+          </label>
+          <input
+            type="tel"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            defaultValue="+1 (555) 123-4567"
+          />
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Language
+          </label>
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Time Zone
+          </label>
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value="UTC-5">Eastern Time (UTC-5)</option>
+            <option value="UTC-6">Central Time (UTC-6)</option>
+            <option value="UTC-7">Mountain Time (UTC-7)</option>
+            <option value="UTC-8">Pacific Time (UTC-8)</option>
+          </select>
+        </div>
+      </div>
+      </div>
+    </div>
+  )
+
+  const renderNotificationSettings = () => (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        <h4 className="text-lg font-medium text-gray-900">Email Notifications</h4>
+        <div className="space-y-3">
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">Leave request approvals</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">Payroll updates</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">Training reminders</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" />
+            <span className="text-sm text-gray-700">System maintenance alerts</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-lg font-medium text-gray-900">SMS Notifications</h4>
+        <div className="space-y-2">
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" />
+            <span className="text-sm text-gray-700">Emergency alerts</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" />
+            <span className="text-sm text-gray-700">Shift changes</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <h4 className="text-lg font-medium text-gray-900">In-App Notifications</h4>
+        <div className="space-y-2">
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">New messages</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">Task assignments</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">Approval requests</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderSecuritySettings = () => (
+    <div className="space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Current Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 pr-10"
+            placeholder="Enter current password"
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          New Password
+        </label>
+        <input
+          type="password"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          placeholder="Enter new password"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Confirm New Password
+        </label>
+        <input
+          type="password"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          placeholder="Confirm new password"
+        />
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="text-lg font-medium text-gray-900">Security Options</h4>
+        <div className="space-y-3">
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" />
+            <span className="text-sm text-gray-700">Enable two-factor authentication</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" defaultChecked />
+            <span className="text-sm text-gray-700">Session timeout after 30 minutes</span>
+          </label>
+          <label className="flex items-center">
+            <input type="checkbox" className="mr-3" />
+            <span className="text-sm text-gray-700">Require password change every 90 days</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderSystemSettings = () => (
+    <div className="space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Company Name
+        </label>
+        <input
+          type="text"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          defaultValue="iRis Technologies"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Default Leave Policy
+          </label>
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value="standard">Standard (20 days/year)</option>
+            <option value="generous">Generous (25 days/year)</option>
+            <option value="minimal">Minimal (15 days/year)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Approval Hierarchy
+          </label>
+          <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value="direct">Direct Manager</option>
+            <option value="department">Department Head</option>
+            <option value="hr">HR Manager</option>
+            <option value="ceo">CEO</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Working Hours
+        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Start Time</label>
+            <input
+              type="time"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              defaultValue="09:00"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">End Time</label>
+            <input
+              type="time"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              defaultValue="17:00"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderIntegrationSettings = () => (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h4 className="text-lg font-medium text-gray-900">Email Configuration</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              SMTP Server
+            </label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              defaultValue="smtp.gmail.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              SMTP Port
+            </label>
+            <input
+              type="number"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              defaultValue="587"
+            />
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email Address
+          </label>
+          <input
+            type="email"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            defaultValue="hr@company.com"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <h4 className="text-lg font-medium text-gray-900">SMS Configuration</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              SMS Provider
+            </label>
+            <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+              <option value="twilio">Twilio</option>
+              <option value="nexmo">Nexmo</option>
+              <option value="aws">AWS SNS</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              API Key
+            </label>
+            <input
+              type="password"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Enter API key"
+            />
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+  )
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'personal':
+        return renderPersonalSettings()
+      case 'notifications':
+        return renderNotificationSettings()
+      case 'security':
+        return renderSecuritySettings()
+      case 'system':
+        return renderSystemSettings()
+      case 'integrations':
+        return renderIntegrationSettings()
+      default:
+        return renderPersonalSettings()
+    }
+  }
+
+  return (
+    <div className="flex h-screen bg-slate-50">
+      <Sidebar />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        
+        <main className="flex-1 p-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Settings</h1>
+              <p className="text-gray-600">Manage your account preferences and system configurations</p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow">
+              <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100vh-300px)]">
+                {/* Sidebar - Fixed height, no scroll */}
+                <div className="lg:col-span-1 border-r border-gray-200">
+                  <nav className="p-3">
+                    <ul className="space-y-1">
+                      {settingsSections.map((section) => (
+                        <li key={section.id}>
+                          <button
+                            onClick={() => setActiveSection(section.id)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                              activeSection === section.id
+                                ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              <section.icon className="h-4 w-4" />
+                              <div>
+                                <div className="font-medium text-sm">{section.title}</div>
+                                <div className="text-xs text-gray-500">
+                                  {section.description}
+                                </div>
+                              </div>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </div>
+
+                {/* Content - Scrollable when content is long */}
+                <div className="lg:col-span-2 p-4 flex flex-col h-full">
+                  <div className="mb-4 flex-shrink-0">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                      {settingsSections.find(s => s.id === activeSection)?.title}
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      {settingsSections.find(s => s.id === activeSection)?.description}
+                    </p>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto pr-2 min-h-0">
+                    <div className="space-y-4">
+                      {renderContent()}
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-200 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={handleSave}
+                        className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
+                      >
+                        <Save className="h-4 w-4" />
+                        <span>Save Changes</span>
+                      </button>
+                      
+                      {saved && (
+                        <div className="flex items-center space-x-2 text-green-600">
+                          <CheckCircle className="h-4 w-4" />
+                          <span className="text-sm font-medium">Settings saved successfully!</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  )
+}

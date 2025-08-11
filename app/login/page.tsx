@@ -124,7 +124,7 @@ export default function LoginPage() {
                 Welcome to iRis
               </CardTitle>
               <p className="text-orange-100 text-sm">
-                Sign in to access the iRis Management System
+                Sign in to access the iRis Company
               </p>
             </CardHeader>
 

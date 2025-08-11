@@ -28,7 +28,10 @@ import {
   BarChart3,
   TrendingUp,
   Settings,
-  CheckCircle
+  CheckCircle,
+  PieChart,
+  LineChart,
+  BarChart
 } from "lucide-react"
 
 export default function AdminDashboardPage() {
@@ -53,6 +56,36 @@ export default function AdminDashboardPage() {
     jobs: { open: 5, applications: 23, hired: 3 },
     branches: { total: 4, active: 4, totalEmployees: 156 },
     settings: { integrations: 6 }
+  }
+
+  // Chart data
+  const chartData = {
+    monthlyRevenue: [
+      { month: 'Jan', revenue: 2800000 },
+      { month: 'Feb', revenue: 3200000 },
+      { month: 'Mar', revenue: 2900000 },
+      { month: 'Apr', revenue: 3500000 },
+      { month: 'May', revenue: 3800000 },
+      { month: 'Jun', revenue: 4200000 },
+      { month: 'Jul', revenue: 4000000 },
+      { month: 'Aug', revenue: 4500000 },
+      { month: 'Sep', revenue: 4300000 },
+      { month: 'Oct', revenue: 4800000 },
+      { month: 'Nov', revenue: 5200000 },
+      { month: 'Dec', revenue: 5800000 }
+    ],
+    departmentDistribution: [
+      { name: 'Engineering', value: 35, color: '#3B82F6' },
+      { name: 'Sales', value: 25, color: '#10B981' },
+      { name: 'Marketing', value: 20, color: '#F59E0B' },
+      { name: 'HR', value: 15, color: '#EF4444' },
+      { name: 'Finance', value: 5, color: '#8B5CF6' }
+    ],
+    projectStatus: [
+      { status: 'Active', count: 15, color: '#10B981' },
+      { status: 'Completed', count: 23, color: '#3B82F6' },
+      { status: 'Pending', count: 7, color: '#F59E0B' }
+    ]
   }
 
   // Redirect to login if not authenticated
@@ -129,7 +162,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
 
-        {/* Statistics Cards */}
+          {/* 4 Main Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-white/80 rounded-3xl shadow-xl border border-slate-100 p-6 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 backdrop-blur-md">
             <div className="flex items-center justify-between mb-4">
@@ -254,256 +287,155 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Quick Navigation */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/hr')}>
-            <div className="flex items-center justify-between mb-2">
-              <Briefcase className="h-5 w-5 text-blue-600" />
-              <span className="text-xs font-medium text-slate-500">HR</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Employees</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.employees.total}</span>
+          {/* Charts and Analytics Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            {/* Revenue Trend Chart */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Revenue Trend</h3>
+                <LineChart className="h-5 w-5 text-blue-600" />
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Active</span>
-                <span className="text-xs font-semibold text-green-600">{stats.employees.active}</span>
+              <div className="h-64 flex items-end justify-between gap-2">
+                {chartData.monthlyRevenue.map((data, index) => (
+                  <div key={index} className="flex-1 flex flex-col items-center">
+                    <div 
+                      className="w-full bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-sm"
+                      style={{ height: `${(data.revenue / 6000000) * 200}px` }}
+                    ></div>
+                    <span className="text-xs text-slate-600 mt-2">{data.month}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Departments</span>
-                <span className="text-xs font-semibold text-purple-600">{stats.departments.total}</span>
-              </div>
+              <div className="mt-4 text-center">
+                <p className="text-sm text-slate-600">Monthly revenue progression</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/crm')}>
-            <div className="flex items-center justify-between mb-2">
-              <UserCheck className="h-5 w-5 text-green-600" />
-              <span className="text-xs font-medium text-slate-500">CRM</span>
+            {/* Department Distribution Pie Chart */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Department Distribution</h3>
+                <PieChart className="h-5 w-5 text-green-600" />
+              </div>
+              <div className="flex items-center justify-center h-64">
+                <div className="relative w-32 h-32">
+                  {chartData.departmentDistribution.map((dept, index) => {
+                    const total = chartData.departmentDistribution.reduce((sum, d) => sum + d.value, 0);
+                    const percentage = (dept.value / total) * 100;
+                    const rotation = chartData.departmentDistribution
+                      .slice(0, index)
+                      .reduce((sum, d) => sum + (d.value / total) * 360, 0);
+                    
+                    return (
+                      <div
+                        key={dept.name}
+                        className="absolute inset-0 rounded-full border-8 border-transparent"
+                        style={{
+                          borderTopColor: dept.color,
+                          transform: `rotate(${rotation}deg)`,
+                          clipPath: `polygon(50% 0%, 50% 50%, 100% 50%, 100% 0%)`
+                        }}
+                      />
+                    );
+                  })}
+              </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                {chartData.departmentDistribution.map((dept) => (
+                  <div key={dept.name} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: dept.color }}
+                      ></div>
+                      <span className="text-slate-700">{dept.name}</span>
             </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Customers</span>
-                <span className="text-xs font-semibold text-green-600">{stats.crm.totalCustomers}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Active</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.crm.activeCustomers}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Revenue</span>
-                <span className="text-xs font-semibold text-purple-600">TZS {stats.crm.totalRevenue.toLocaleString()}</span>
+                    <span className="font-medium text-slate-900">{dept.value}%</span>
+          </div>
+                ))}
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/projects')}>
-            <div className="flex items-center justify-between mb-2">
-              <FileText className="h-5 w-5 text-purple-600" />
-              <span className="text-xs font-medium text-slate-500">Projects</span>
+          {/* Additional Charts Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            {/* Project Status Chart */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900">Project Status</h3>
+                <BarChart className="h-5 w-5 text-purple-600" />
+              </div>
+              <div className="space-y-3">
+                {chartData.projectStatus.map((status) => (
+                  <div key={status.status} className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-slate-700">{status.status}</span>
+                      <span className="font-medium text-slate-900">{status.count}</span>
+              </div>
+                    <div className="w-full bg-slate-200 rounded-full h-2">
+                      <div 
+                        className="h-2 rounded-full"
+                        style={{ 
+                          width: `${(status.count / 45) * 100}%`,
+                          backgroundColor: status.color 
+                        }}
+                      ></div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Active</span>
-                <span className="text-xs font-semibold text-purple-600">{stats.projects.active}</span>
+                ))}
+            </div>
+          </div>
+          
+            {/* Quick Stats */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Stats</h3>
+              <div className="space-y-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-600">{stats.projects.active}</p>
+                  <p className="text-sm text-blue-700">Active Projects</p>
+            </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{stats.tasks.completed}</p>
+                  <p className="text-sm text-green-700">Completed Tasks</p>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Completed</span>
-                <span className="text-xs font-semibold text-green-600">{stats.projects.completed}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Pending</span>
-                <span className="text-xs font-semibold text-yellow-600">{stats.projects.pending}</span>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <p className="text-2xl font-bold text-orange-600">{stats.sales.totalOrders}</p>
+                  <p className="text-sm text-orange-700">Total Orders</p>
               </div>
             </div>
           </div>
           
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/tasks')}>
-            <div className="flex items-center justify-between mb-2">
-              <CheckSquare className="h-5 w-5 text-orange-600" />
-              <span className="text-xs font-medium text-slate-500">Tasks</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Total</span>
-                <span className="text-xs font-semibold text-orange-600">{stats.tasks.total}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Completed</span>
-                <span className="text-xs font-semibold text-green-600">{stats.tasks.completed}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Pending</span>
-                <span className="text-xs font-semibold text-yellow-600">{stats.tasks.pending}</span>
+            {/* System Health */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">System Health</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Database</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-600">Healthy</span>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/finance')}>
-            <div className="flex items-center justify-between mb-2">
-              <DollarSign className="h-5 w-5 text-green-600" />
-              <span className="text-xs font-medium text-slate-500">Finance</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Income</span>
-                <span className="text-xs font-semibold text-green-600">TZS {stats.finance.totalIncome.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Expenses</span>
-                <span className="text-xs font-semibold text-red-600">TZS {stats.finance.totalExpenses.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Profit</span>
-                <span className="text-xs font-semibold text-blue-600">TZS {stats.finance.netProfit.toLocaleString()}</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">API Services</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-600">Online</span>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/sales')}>
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="h-5 w-5 text-indigo-600" />
-              <span className="text-xs font-medium text-slate-500">Sales</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">This Month</span>
-                <span className="text-xs font-semibold text-indigo-600">TZS {stats.sales.monthlyRevenue.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Orders</span>
-                <span className="text-xs font-semibold text-green-600">{stats.sales.totalOrders}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Growth</span>
-                <span className="text-xs font-semibold text-blue-600">+{stats.sales.growthRate}%</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Storage</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-yellow-600">75%</span>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/inventory')}>
-            <div className="flex items-center justify-between mb-2">
-              <Database className="h-5 w-5 text-amber-600" />
-              <span className="text-xs font-medium text-slate-500">Inventory</span>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Performance</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-green-600">Optimal</span>
             </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Items</span>
-                <span className="text-xs font-semibold text-amber-600">{stats.inventory.totalItems}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">In Stock</span>
-                <span className="text-xs font-semibold text-green-600">{stats.inventory.inStock}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Low Stock</span>
-                <span className="text-xs font-semibold text-red-600">{stats.inventory.lowStockItems}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/reports')}>
-            <div className="flex items-center justify-between mb-2">
-              <BarChart3 className="h-5 w-5 text-red-600" />
-              <span className="text-xs font-medium text-slate-500">Reports</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Generated</span>
-                <span className="text-xs font-semibold text-red-600">{stats.reports.generated}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">This Month</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.reports.monthlyReports}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Templates</span>
-                <span className="text-xs font-semibold text-green-600">{stats.reports.templates}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/events')}>
-            <div className="flex items-center justify-between mb-2">
-              <Calendar className="h-5 w-5 text-teal-600" />
-              <span className="text-xs font-medium text-slate-500">Events</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Upcoming</span>
-                <span className="text-xs font-semibold text-teal-600">{stats.events.upcoming}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">This Week</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.events.thisWeek}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">This Month</span>
-                <span className="text-xs font-semibold text-green-600">{stats.events.thisMonth}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/jobs')}>
-            <div className="flex items-center justify-between mb-2">
-              <UserCheck className="h-5 w-5 text-pink-600" />
-              <span className="text-xs font-medium text-slate-500">Jobs</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Open</span>
-                <span className="text-xs font-semibold text-pink-600">{stats.jobs.open}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Applications</span>
-                <span className="text-xs font-semibold text-green-600">{stats.jobs.applications}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Hired</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.jobs.hired}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/branches')}>
-            <div className="flex items-center justify-between mb-2">
-              <Building2 className="h-5 w-5 text-cyan-600" />
-              <span className="text-xs font-medium text-slate-500">Branches</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Total</span>
-                <span className="text-xs font-semibold text-cyan-600">{stats.branches.total}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Active</span>
-                <span className="text-xs font-semibold text-green-600">{stats.branches.active}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Employees</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.branches.totalEmployees}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all cursor-pointer" onClick={() => router.push('/settings')}>
-            <div className="flex items-center justify-between mb-2">
-              <Settings className="h-5 w-5 text-gray-600" />
-              <span className="text-xs font-medium text-slate-500">Settings</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">System</span>
-                <span className="text-xs font-semibold text-gray-600">Configured</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Business</span>
-                <span className="text-xs font-semibold text-green-600">Active</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-slate-600">Integrations</span>
-                <span className="text-xs font-semibold text-blue-600">{stats.settings.integrations}</span>
               </div>
             </div>
           </div>

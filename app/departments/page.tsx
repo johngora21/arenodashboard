@@ -55,6 +55,10 @@ interface NewDepartmentForm {
   code: string
   location: string
   description: string
+  manager: string
+  budget: number
+  employeeCount: number
+  status: string
 }
 
 export default function DepartmentsPage() {
@@ -75,7 +79,11 @@ export default function DepartmentsPage() {
     branchName: '',
     code: '',
     location: '',
-    description: ''
+    description: '',
+    manager: '',
+    budget: 0,
+    employeeCount: 0,
+    status: 'active'
   })
 
   // Mock branches data
@@ -128,7 +136,7 @@ export default function DepartmentsPage() {
     }
   }
 
-  const handleInputChange = (field: keyof NewDepartmentForm, value: string) => {
+  const handleInputChange = (field: keyof NewDepartmentForm, value: string | number) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -156,8 +164,8 @@ export default function DepartmentsPage() {
         description: formData.description,
         manager: formData.manager,
         location: formData.location,
-        budget: parseFloat(formData.budget),
-        employeeCount: parseInt(formData.employeeCount),
+        budget: formData.budget,
+        employeeCount: formData.employeeCount,
         status: formData.status
       }
 
@@ -173,8 +181,8 @@ export default function DepartmentsPage() {
         description: '',
         manager: '',
         location: '',
-        budget: '',
-        employeeCount: '',
+        budget: 0,
+        employeeCount: 0,
         status: 'active'
       })
       setShowAddDepartment(false)

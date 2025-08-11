@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Users, UserPlus, Award, TrendingUp, Calendar, DollarSign, FileText, Plus, Filter, Eye, Edit, Trash2, Shield, BarChart3, Download, Search, MoreHorizontal, GraduationCap, Clock, MessageSquare, Mail, Building, Briefcase, Phone, Upload, CheckCircle } from "lucide-react";
+import { Users, UserPlus, Award, TrendingUp, Calendar, DollarSign, FileText, Plus, Filter, Eye, Edit, Trash2, Shield, BarChart3, Download, Search, MoreHorizontal, GraduationCap, Clock, MessageSquare, Mail, Building, Briefcase, Phone, Upload, CheckCircle, TrendingDown, UserCheck, UserX, MapPin, Target, Activity, Zap, Star, AlertTriangle, CheckCircle2, Clock3, PieChart, LineChart, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 
@@ -34,6 +34,9 @@ export default function HRPage() {
   const [isEmployeeRelationsModalOpen, setIsEmployeeRelationsModalOpen] = useState(false);
   const [isPayrollModalOpen, setIsPayrollModalOpen] = useState(false);
   const [isAddPositionModalOpen, setIsAddPositionModalOpen] = useState(false);
+  const [isEmployeeSelectionModalOpen, setIsEmployeeSelectionModalOpen] = useState(false);
+  const [selectedModule, setSelectedModule] = useState<string>("");
+  const [selectedEmployeesForModule, setSelectedEmployeesForModule] = useState<string[]>([]);
 
   // Sample employee data
   const employees = [
@@ -47,6 +50,43 @@ export default function HRPage() {
   const departments = ["All", "Engineering", "Marketing", "Sales", "HR", "Finance", "Operations"];
   const statuses = ["All", "Active", "On Leave", "Terminated", "Suspended"];
 
+  // Analytics data
+  const hrMetrics = {
+    totalEmployees: 156,
+    activeEmployees: 142,
+    onLeave: 8,
+    terminated: 3,
+    newHires: 12,
+    turnoverRate: 2.1,
+    avgTenure: 3.2,
+    totalPayroll: 450000000,
+    avgSalary: 2884615,
+    trainingCompletion: 87,
+    performanceRating: 4.2,
+    attendanceRate: 94.5,
+    leaveUtilization: 78.3
+  };
+
+  const departmentStats = [
+    { name: "Engineering", count: 45, growth: 12.5, avgSalary: 3200000, performance: 4.3 },
+    { name: "Sales", count: 38, growth: 8.2, avgSalary: 2800000, performance: 4.1 },
+    { name: "Marketing", count: 25, growth: 15.8, avgSalary: 2600000, performance: 4.2 },
+    { name: "Finance", count: 22, growth: 5.4, avgSalary: 3000000, performance: 4.4 },
+    { name: "HR", count: 18, growth: 11.1, avgSalary: 2500000, performance: 4.0 },
+    { name: "Operations", count: 8, growth: 25.0, avgSalary: 2400000, performance: 3.9 }
+  ];
+
+  const monthlyTrends = [
+    { month: "Jan", hires: 8, terminations: 2, payroll: 420000000, attendance: 92.1 },
+    { month: "Feb", hires: 6, terminations: 1, payroll: 425000000, attendance: 93.2 },
+    { month: "Mar", hires: 12, terminations: 3, payroll: 430000000, attendance: 91.8 },
+    { month: "Apr", hires: 9, terminations: 2, payroll: 435000000, attendance: 94.1 },
+    { month: "May", hires: 7, terminations: 1, payroll: 440000000, attendance: 93.9 },
+    { month: "Jun", hires: 11, terminations: 2, payroll: 445000000, attendance: 94.5 },
+    { month: "Jul", hires: 8, terminations: 2, payroll: 448000000, attendance: 94.2 },
+    { month: "Aug", hires: 10, terminations: 1, payroll: 450000000, attendance: 94.5 }
+  ];
+
   const hrModules = [
     {
       id: "training",
@@ -54,7 +94,10 @@ export default function HRPage() {
       description: "Manage training programs and skill development",
       icon: <GraduationCap className="h-6 w-6" />,
       color: "bg-orange-500",
-      onClick: () => setIsTrainingModalOpen(true)
+      onClick: () => {
+        setSelectedModule("training");
+        setIsEmployeeSelectionModalOpen(true);
+      }
     },
     {
       id: "attendance",
@@ -62,7 +105,10 @@ export default function HRPage() {
       description: "Track attendance and manage leave requests",
       icon: <Clock className="h-6 w-6" />,
       color: "bg-red-500",
-      onClick: () => setIsAttendanceModalOpen(true)
+      onClick: () => {
+        setSelectedModule("attendance");
+        setIsEmployeeSelectionModalOpen(true);
+      }
     },
     {
       id: "employee-relations",
@@ -70,7 +116,10 @@ export default function HRPage() {
       description: "Handle grievances, conflicts, and workplace policies",
       icon: <MessageSquare className="h-6 w-6" />,
       color: "bg-blue-500",
-      onClick: () => setIsEmployeeRelationsModalOpen(true)
+      onClick: () => {
+        setSelectedModule("employee-relations");
+        setIsEmployeeSelectionModalOpen(true);
+      }
     },
     {
       id: "payroll",
@@ -78,7 +127,10 @@ export default function HRPage() {
       description: "Handle salary processing and benefits",
       icon: <DollarSign className="h-6 w-6" />,
       color: "bg-emerald-500",
-      onClick: () => setIsPayrollModalOpen(true)
+      onClick: () => {
+        setSelectedModule("payroll");
+        setIsEmployeeSelectionModalOpen(true);
+      }
     }
   ];
 
@@ -121,9 +173,9 @@ export default function HRPage() {
               </div>
             </div>
           </div>
-          
-                      {/* Tabs Section */}
-            <Tabs defaultValue="dashboard" className="w-full mt-8">
+
+          {/* Tabs Section */}
+          <Tabs defaultValue="dashboard" className="w-full mt-8">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
               <TabsTrigger value="employees">Employees</TabsTrigger>
@@ -131,64 +183,239 @@ export default function HRPage() {
               <TabsTrigger value="reports">Reports</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="dashboard" className="space-y-6 mt-24">
-              {/* Stats Cards */}
+            <TabsContent value="dashboard" className="space-y-6 mt-6">
+              {/* Key Performance Indicators */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                <Card className="bg-white border-slate-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div>
+                        <p className="text-sm font-medium text-slate-700">Total Employees</p>
+                        <p className="text-3xl font-bold text-slate-900">{hrMetrics.totalEmployees}</p>
+                        <div className="flex items-center mt-1">
+                          <ArrowUpRight className="h-4 w-4 text-green-600 mr-1" />
+                          <span className="text-xs text-green-600 font-medium">+{hrMetrics.newHires} this month</span>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-slate-100 rounded-xl">
+                        <Users className="h-8 w-8 text-slate-600" />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                
+                <Card className="bg-white border-slate-200">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-slate-600">Total Employees</p>
-                        <p className="text-2xl font-bold text-slate-900">156</p>
-                        <p className="text-xs text-green-600">+12% from last month</p>
+                        <p className="text-sm font-medium text-slate-700">Active Employees</p>
+                        <p className="text-3xl font-bold text-slate-900">{hrMetrics.activeEmployees}</p>
+                        <div className="flex items-center mt-1">
+                          <CheckCircle2 className="h-4 w-4 text-green-600 mr-1" />
+                          <span className="text-xs text-green-600 font-medium">{((hrMetrics.activeEmployees/hrMetrics.totalEmployees)*100).toFixed(1)}% active rate</span>
+              </div>
                       </div>
-                      <div className="p-3 bg-blue-100 rounded-lg">
-                        <Users className="h-6 w-6 text-blue-600" />
+                      <div className="p-3 bg-slate-100 rounded-xl">
+                        <UserCheck className="h-8 w-8 text-slate-600" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                <Card className="bg-white border-slate-200">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-slate-600">Active Employees</p>
-                        <p className="text-2xl font-bold text-slate-900">142</p>
-                        <p className="text-xs text-green-600">91% active rate</p>
+                        <p className="text-sm font-medium text-slate-700">On Leave</p>
+                        <p className="text-3xl font-bold text-slate-900">{hrMetrics.onLeave}</p>
+                        <div className="flex items-center mt-1">
+                          <Clock3 className="h-4 w-4 text-orange-600 mr-1" />
+                          <span className="text-xs text-orange-600 font-medium">{hrMetrics.leaveUtilization}% utilization</span>
+                        </div>
                       </div>
-                      <div className="p-3 bg-green-100 rounded-lg">
-                        <Users className="h-6 w-6 text-green-600" />
+                      <div className="p-3 bg-slate-100 rounded-xl">
+                        <Calendar className="h-8 w-8 text-slate-600" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
                 
-                <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                <Card className="bg-white border-slate-200">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-slate-600">On Leave</p>
-                        <p className="text-2xl font-bold text-slate-900">8</p>
-                        <p className="text-xs text-orange-600">5% of workforce</p>
+                        <p className="text-sm font-medium text-slate-700">Total Payroll</p>
+                        <p className="text-3xl font-bold text-slate-900">TZS {(hrMetrics.totalPayroll/1000000).toFixed(0)}M</p>
+                        <div className="flex items-center mt-1">
+                          <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+                          <span className="text-xs text-green-600 font-medium">+8% from last month</span>
+                        </div>
                       </div>
-                      <div className="p-3 bg-orange-100 rounded-lg">
-                        <Calendar className="h-6 w-6 text-orange-600" />
+                      <div className="p-3 bg-slate-100 rounded-xl">
+                        <DollarSign className="h-8 w-8 text-slate-600" />
                       </div>
                     </div>
                   </CardContent>
                 </Card>
-                
-                <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-slate-600">Total Payroll</p>
-                        <p className="text-2xl font-bold text-slate-900">TZS 450M</p>
-                        <p className="text-xs text-green-600">+8% from last month</p>
+              </div>
+
+
+
+              {/* Department Analytics */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card className="bg-white">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5 text-blue-600" />
+                      Department Overview
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {departmentStats.map((dept, index) => (
+                        <div key={dept.name} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-3 h-3 rounded-full ${
+                              index === 0 ? 'bg-blue-500' : 
+                              index === 1 ? 'bg-green-500' : 
+                              index === 2 ? 'bg-orange-500' : 
+                              index === 3 ? 'bg-purple-500' : 
+                              index === 4 ? 'bg-red-500' : 'bg-slate-500'
+                            }`}></div>
+                            <div>
+                              <p className="font-medium text-slate-900">{dept.name}</p>
+                              <p className="text-sm text-slate-600">{dept.count} employees</p>
                       </div>
-                      <div className="p-3 bg-purple-100 rounded-lg">
-                        <DollarSign className="h-6 w-6 text-purple-600" />
+                      </div>
+                          <div className="text-right">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-slate-900">
+                                TZS {(dept.avgSalary/1000000).toFixed(1)}M
+                              </span>
+                              <Badge variant="outline" className="text-xs">
+                                {dept.growth > 0 ? '+' : ''}{dept.growth}%
+                              </Badge>
+                      </div>
+                            <p className="text-xs text-slate-500">Avg: {dept.performance}/5</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <LineChart className="h-5 w-5 text-green-600" />
+                      Monthly Trends
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {monthlyTrends.slice(-6).map((month, index) => (
+                        <div key={month.month} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-medium text-blue-700">{month.month}</span>
+                      </div>
+                            <div>
+                              <p className="font-medium text-slate-900">{month.hires} hires</p>
+                              <p className="text-sm text-slate-600">{month.terminations} terminations</p>
+                      </div>
+                      </div>
+                          <div className="text-right">
+                            <div className="text-sm font-medium text-slate-900">
+                              TZS {(month.payroll/1000000).toFixed(0)}M
+                    </div>
+                            <div className="flex items-center gap-1">
+                              <Activity className="h-3 w-3 text-green-600" />
+                              <span className="text-xs text-slate-500">{month.attendance}%</span>
+              </div>
+                      </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions & Alerts */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <Card className="bg-white">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-orange-600" />
+                      Pending Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-2 bg-orange-50 rounded-lg">
+                        <span className="text-sm text-orange-800">Leave requests pending</span>
+                        <Badge variant="outline" className="bg-orange-100 text-orange-800">5</Badge>
+                      </div>
+                      <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                        <span className="text-sm text-blue-800">Performance reviews due</span>
+                        <Badge variant="outline" className="bg-blue-100 text-blue-800">12</Badge>
+                    </div>
+                      <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
+                        <span className="text-sm text-red-800">Contract renewals</span>
+                        <Badge variant="outline" className="bg-red-100 text-red-800">3</Badge>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                      Recent Achievements
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-800">Training program completed</span>
+                      </div>
+                      <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
+                        <Award className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm text-blue-800">Employee of the month</span>
+                    </div>
+                      <div className="flex items-center gap-2 p-2 bg-purple-50 rounded-lg">
+                        <Star className="h-4 w-4 text-purple-600" />
+                        <span className="text-sm text-purple-800">Performance milestone</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-white">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5 text-slate-600" />
+                      Location Distribution
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-700">Main Branch</span>
+                        <span className="text-sm font-medium text-slate-900">89</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-700">Dar es Salaam</span>
+                        <span className="text-sm font-medium text-slate-900">34</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-700">Arusha</span>
+                        <span className="text-sm font-medium text-slate-900">18</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-slate-700">Mwanza</span>
+                        <span className="text-sm font-medium text-slate-900">15</span>
                       </div>
                     </div>
                   </CardContent>
@@ -196,60 +423,60 @@ export default function HRPage() {
               </div>
             </TabsContent>
 
-                          <TabsContent value="employees" className="space-y-6 mt-8">
-                <div className="flex justify-end mb-4">
-                  <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setShowAddEmployee(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Employee
-                  </Button>
-                </div>
-                
-                <div className="flex items-center justify-start gap-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Search employees..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 w-80"
-                    />
+            <TabsContent value="employees" className="space-y-6 mt-8">
+              <div className="flex justify-end mb-4">
+                <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setShowAddEmployee(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Employee
+                </Button>
+              </div>
+              
+              <div className="flex items-center justify-start gap-4">
+                    <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                        placeholder="Search employees..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-80"
+                      />
+                    </div>
+                <Select value={selectedBranch} onValueChange={setSelectedBranch}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Branches</SelectItem>
+                    <SelectItem value="Main Branch">Main Branch</SelectItem>
+                    <SelectItem value="Dar es Salaam">Dar es Salaam</SelectItem>
+                    <SelectItem value="Arusha">Arusha</SelectItem>
+                    <SelectItem value="Mwanza">Mwanza</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Departments</SelectItem>
+                    <SelectItem value="Engineering">Engineering</SelectItem>
+                    <SelectItem value="Marketing">Marketing</SelectItem>
+                    <SelectItem value="Sales">Sales</SelectItem>
+                    <SelectItem value="HR">HR</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Status</SelectItem>
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="On Leave">On Leave</SelectItem>
+                  </SelectContent>
+                </Select>
                   </div>
-                  <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Branch" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="All">All Branches</SelectItem>
-                      <SelectItem value="Main Branch">Main Branch</SelectItem>
-                      <SelectItem value="Dar es Salaam">Dar es Salaam</SelectItem>
-                      <SelectItem value="Arusha">Arusha</SelectItem>
-                      <SelectItem value="Mwanza">Mwanza</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Department" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="All">All Departments</SelectItem>
-                      <SelectItem value="Engineering">Engineering</SelectItem>
-                      <SelectItem value="Marketing">Marketing</SelectItem>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="HR">HR</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="All">All Status</SelectItem>
-                      <SelectItem value="Active">Active</SelectItem>
-                      <SelectItem value="On Leave">On Leave</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
+                  
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredEmployees.map((employee) => (
                   <Card key={employee.id} className="bg-white shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-200 overflow-hidden">
@@ -259,12 +486,12 @@ export default function HRPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-xl">
                             {employee.name.split(' ').map(n => n[0]).join('')}
-                          </div>
+                  </div>
                           <div className="flex-1">
                             <h3 className="font-bold text-lg text-gray-900 leading-tight mb-1">{employee.name}</h3>
                             <p className="text-sm text-gray-600 font-medium">{employee.position}</p>
-                          </div>
-                        </div>
+                </div>
+              </div>
                         <Badge
                           variant={employee.status === "Active" ? "default" : "secondary"}
                           className={`${
@@ -286,7 +513,7 @@ export default function HRPage() {
                         <div className="flex items-center gap-2 text-gray-600">
                           <Briefcase className="h-4 w-4 text-gray-400" />
                           <span className="text-sm font-medium">{employee.department}</span>
-                        </div>
+                          </div>
                         <div className="flex items-center gap-2 text-gray-600">
                           <Mail className="h-4 w-4 text-gray-400" />
                           <span className="text-sm font-medium">{employee.email}</span>
@@ -296,18 +523,18 @@ export default function HRPage() {
                           <span className="text-sm font-medium">+255 123 456 789</span>
                         </div>
                       </div>
-
+                      
                       {/* Action Buttons */}
                       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                         <div className="flex items-center gap-2">
-                          <Button 
+                        <Button 
                             variant="ghost" 
-                            size="sm" 
+                          size="sm" 
                             className="h-9 w-9 p-0 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                             onClick={() => setIsEmployeeViewModalOpen(true)}
-                          >
+                        >
                             <Eye className="h-4 w-4" />
-                          </Button>
+                        </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
@@ -315,8 +542,8 @@ export default function HRPage() {
                             onClick={() => setIsEmployeeProfileModalOpen(true)}
                           >
                             <Edit className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        </Button>
+                      </div>
                         <div className="text-xs text-gray-400 font-medium">
                           ID: {employee.id}
                         </div>
@@ -340,8 +567,8 @@ export default function HRPage() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 {hrModules.map((module) => (
-                  <Card
-                    key={module.id}
+                  <Card 
+                    key={module.id} 
                     className="bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                     onClick={module.onClick}
                   >
@@ -369,7 +596,7 @@ export default function HRPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
+                  <div className="space-y-4">
                       <h3 className="font-semibold text-lg">Employee Reports</h3>
                       <div className="space-y-3">
                         <Button variant="outline" className="w-full justify-start">
@@ -388,8 +615,8 @@ export default function HRPage() {
                           <DollarSign className="h-4 w-4 mr-2" />
                           Payroll Summary
                         </Button>
-                      </div>
-                    </div>
+                          </div>
+                        </div>
                     <div className="space-y-4">
                       <h3 className="font-semibold text-lg">Analytics</h3>
                       <div className="space-y-3">
@@ -409,8 +636,8 @@ export default function HRPage() {
                           <Download className="h-4 w-4 mr-2" />
                           Export Data
                         </Button>
+                        </div>
                       </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -433,7 +660,7 @@ export default function HRPage() {
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name *</Label>
                   <Input id="firstName" placeholder="Enter first name" />
-                </div>
+      </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name *</Label>
                   <Input id="lastName" placeholder="Enter last name" />
@@ -670,7 +897,7 @@ export default function HRPage() {
             </DialogContent>
           </Dialog>
 
-          {/* Employee Profile Modal */}
+      {/* Employee Profile Modal */}
           <Dialog open={isEmployeeProfileModalOpen} onOpenChange={setIsEmployeeProfileModalOpen}>
             <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
@@ -2317,8 +2544,8 @@ export default function HRPage() {
                     id="jobDescription" 
                     placeholder="Provide a comprehensive overview of the position..."
                     className="min-h-[120px]"
-                  />
-                </div>
+      />
+    </div>
 
                 {/* Key Responsibilities */}
                 <div>
@@ -2394,8 +2621,146 @@ export default function HRPage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          {/* Employee Selection Modal */}
+          <Dialog open={isEmployeeSelectionModalOpen} onOpenChange={setIsEmployeeSelectionModalOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh]">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Select Employee(s) for {selectedModule === "training" ? "Training & Development" : 
+                                       selectedModule === "attendance" ? "Attendance & Leave" : 
+                                       selectedModule === "employee-relations" ? "Employee Relations" : 
+                                       selectedModule === "payroll" ? "Payroll Management" : "HR Module"}
+                </DialogTitle>
+                <DialogDescription>
+                  Choose the employee(s) you want to work with for this module.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4 py-4">
+                {/* Search and Filters */}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <Input 
+                      placeholder="Search employees..." 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                  <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Departments</SelectItem>
+                      {departments.filter(d => d !== "All").map(dept => (
+                        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Statuses</SelectItem>
+                      {statuses.filter(s => s !== "All").map(status => (
+                        <SelectItem key={status} value={status}>{status}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Employee List */}
+                <div className="border rounded-lg max-h-96 overflow-y-auto">
+                  <div className="p-4 bg-slate-50 border-b">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-slate-700">
+                        {filteredEmployees.length} employee(s) found
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="select-all"
+                          checked={selectedEmployeesForModule.length === filteredEmployees.length && filteredEmployees.length > 0}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedEmployeesForModule(filteredEmployees.map(emp => emp.id.toString()));
+                            } else {
+                              setSelectedEmployeesForModule([]);
+                            }
+                          }}
+                        />
+                        <Label htmlFor="select-all" className="text-sm">Select All</Label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="divide-y">
+                    {filteredEmployees.map((employee) => (
+                      <div key={employee.id} className="p-4 hover:bg-slate-50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Checkbox 
+                              id={`employee-${employee.id}`}
+                              checked={selectedEmployeesForModule.includes(employee.id.toString())}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedEmployeesForModule(prev => [...prev, employee.id.toString()]);
+                                } else {
+                                  setSelectedEmployeesForModule(prev => prev.filter(id => id !== employee.id.toString()));
+                                }
+                              }}
+                            />
+                            <div>
+                              <p className="font-medium text-slate-900">{employee.name}</p>
+                              <p className="text-sm text-slate-600">{employee.position} • {employee.department}</p>
+                              <p className="text-xs text-slate-500">{employee.email}</p>
+                            </div>
+                          </div>
+                          <Badge variant={employee.status === "Active" ? "default" : "secondary"}>
+                            {employee.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter className="mt-6">
+                <Button variant="outline" onClick={() => {
+                  setIsEmployeeSelectionModalOpen(false);
+                  setSelectedEmployeesForModule([]);
+                }}>
+                  Cancel
+                </Button>
+                <Button 
+                  className="bg-blue-500 hover:bg-blue-600"
+                  disabled={selectedEmployeesForModule.length === 0}
+                  onClick={() => {
+                    // Handle the selected employees based on the module
+                    if (selectedModule === "training") {
+                      setIsTrainingModalOpen(true);
+                    } else if (selectedModule === "attendance") {
+                      setIsAttendanceModalOpen(true);
+                    } else if (selectedModule === "employee-relations") {
+                      setIsEmployeeRelationsModalOpen(true);
+                    } else if (selectedModule === "payroll") {
+                      setIsPayrollModalOpen(true);
+                    }
+                    setIsEmployeeSelectionModalOpen(false);
+                  }}
+                >
+                  Continue with {selectedEmployeesForModule.length} selected employee{selectedEmployeesForModule.length !== 1 ? 's' : ''}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>
   );
 }
+
+ 

@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Package, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+  CheckCircle,
+  XCircle,
+  Clock,
   Eye, 
   Search, 
   Plus,
@@ -189,8 +189,8 @@ export default function FinanceApprovalsPage() {
                   New Request
                 </Button>
               </div>
+              </div>
             </div>
-          </div>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -271,7 +271,7 @@ export default function FinanceApprovalsPage() {
                 </div>
               </div>
             </div>
-          </div>
+            </div>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -300,7 +300,7 @@ export default function FinanceApprovalsPage() {
                           <div className="flex items-start gap-3">
                             <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
                               {getTypeIcon(approval.type)}
-                            </div>
+              </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
@@ -309,27 +309,27 @@ export default function FinanceApprovalsPage() {
                                 </Badge>
                                 <Badge className={getStatusColor(approval.status)}>
                                   Pending
-                                </Badge>
+                        </Badge>
                               </div>
                               <p className="text-slate-600 mb-3">{approval.description}</p>
                               <div className="flex flex-wrap gap-4 text-sm text-slate-500">
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
                                   {approval.requester} ({approval.requesterRole})
-                                </div>
+                          </div>
                                 <div className="flex items-center gap-1">
                                   <Building2 className="h-4 w-4" />
                                   {approval.department} - {approval.branch}
-                                </div>
+                          </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
                                   {formatDate(approval.submittedAt)}
-                                </div>
+                        </div>
                                 <div className="flex items-center gap-1">
                                   <DollarSign className="h-4 w-4" />
                                   {formatCurrency(approval.totalValue)}
-                                </div>
-                              </div>
+                          </div>
+                        </div>
                             </div>
                           </div>
                         </div>
@@ -408,7 +408,7 @@ export default function FinanceApprovalsPage() {
                             View Details
                           </Button>
                         </div>
-                      </div>
+                    </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -458,9 +458,9 @@ export default function FinanceApprovalsPage() {
                               {approval.comments && (
                                 <div className="mt-3 p-3 bg-red-50 rounded-lg">
                                   <p className="text-sm text-red-800"><strong>Reason:</strong> {approval.comments}</p>
-                                </div>
-                              )}
-                            </div>
+              </div>
+            )}
+          </div>
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -480,4 +480,4 @@ export default function FinanceApprovalsPage() {
       </div>
     </div>
   )
-}
+} 

@@ -11,7 +11,7 @@ import {
   XCircle, 
   Clock, 
   Eye, 
-  Search, 
+  Search,
   Plus,
   Calendar,
   User,
@@ -177,20 +177,20 @@ export default function HRReportsPage() {
         <Header />
         <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100">
           {/* Header */}
-          <div className="mb-8">
+            <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
+                  <div>
                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">HR Approvals</h1>
                 <p className="text-slate-600 mt-1 text-base">Review and manage HR-related approval requests</p>
-              </div>
+                  </div>
               <div className="flex gap-2">
                 <Button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600">
                   <Plus className="h-4 w-4" />
                   New Request
                 </Button>
               </div>
+              </div>
             </div>
-          </div>
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -253,7 +253,7 @@ export default function HRReportsPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
+            </div>
 
           {/* Controls */}
           <div className="mb-6">
@@ -261,18 +261,18 @@ export default function HRReportsPage() {
               <div className="flex flex-col sm:flex-row gap-4 flex-1">
                 <div className="relative flex-1 max-w-md">
                   <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
+                    <input
+                      type="text"
                     placeholder="Search approvals, requesters, or items..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   />
                 </div>
               </div>
             </div>
-          </div>
-
+              </div>
+              
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="grid w-full grid-cols-3">
@@ -336,16 +336,16 @@ export default function HRReportsPage() {
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4" />
-                            View
-                          </Button>
+                              View
+                            </Button>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700">
                             <CheckCircle className="h-4 w-4" />
                             Approve
-                          </Button>
+                                </Button>
                           <Button size="sm" variant="destructive">
                             <XCircle className="h-4 w-4" />
                             Reject
-                          </Button>
+                                </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -411,8 +411,8 @@ export default function HRReportsPage() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
+                    ))}
+                  </div>
             </TabsContent>
 
             <TabsContent value="rejected" className="space-y-4">
@@ -458,11 +458,11 @@ export default function HRReportsPage() {
                               {approval.comments && (
                                 <div className="mt-3 p-3 bg-red-50 rounded-lg">
                                   <p className="text-sm text-red-800"><strong>Reason:</strong> {approval.comments}</p>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
                         <div className="flex gap-2">
                           <Button size="sm" variant="outline">
                             <Eye className="h-4 w-4" />

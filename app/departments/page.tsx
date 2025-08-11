@@ -50,13 +50,11 @@ import {
 
 interface NewDepartmentForm {
   name: string
+  branchId: string
+  branchName: string
   code: string
-  description: string
-  manager: string
   location: string
-  budget: string
-  employeeCount: string
-  status: 'active' | 'inactive' | 'restructuring'
+  description: string
 }
 
 export default function DepartmentsPage() {
@@ -73,14 +71,31 @@ export default function DepartmentsPage() {
   const [formLoading, setFormLoading] = useState(false)
   const [formData, setFormData] = useState<NewDepartmentForm>({
     name: '',
+    branchId: '',
+    branchName: '',
     code: '',
-    description: '',
-    manager: '',
     location: '',
-    budget: '',
-    employeeCount: '',
-    status: 'active'
+    description: ''
   })
+
+  // Mock branches data
+  const branches = [
+    { id: '1', name: 'Dar es Salaam Main Branch', city: 'Dar es Salaam' },
+    { id: '2', name: 'Arusha Branch', city: 'Arusha' },
+    { id: '3', name: 'Mwanza Branch', city: 'Mwanza' },
+    { id: '4', name: 'Dodoma Branch', city: 'Dodoma' },
+    { id: '5', name: 'Tanga Branch', city: 'Tanga' },
+    { id: '6', name: 'Mbeya Branch', city: 'Mbeya' }
+  ]
+
+  const handleBranchChange = (branchId: string) => {
+    const selectedBranch = branches.find(branch => branch.id === branchId)
+    setFormData(prev => ({
+      ...prev,
+      branchId,
+      branchName: selectedBranch?.name || ''
+    }))
+  }
 
   useEffect(() => {
     if (false) { // Temporarily disabled authentication
@@ -420,14 +435,6 @@ export default function DepartmentsPage() {
 
                 <div className="flex gap-2">
                   <Button
-                    onClick={handleSeedSampleData}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    <BarChart3 className="h-4 w-4" />
-                    Add Sample Data
-                  </Button>
-                  <Button
                     onClick={() => setShowAddDepartment(true)}
                     className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600"
                   >
@@ -675,144 +682,87 @@ export default function DepartmentsPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Basic Information */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                    <Building className="h-5 w-5 text-blue-500" />
-                    Basic Information
-                  </h3>
-                  
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
-                      Department Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                      placeholder="e.g., Operations"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-2">
-                      Department Code *
-                    </label>
-                    <input
-                      type="text"
-                      id="code"
-                      value={formData.code}
-                      onChange={(e) => handleInputChange('code', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                      placeholder="e.g., OPS"
-                      maxLength={5}
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="status" className="block text-sm font-medium text-slate-700 mb-2">
-                      Status *
-                    </label>
-                    <select
-                      id="status"
-                      value={formData.status}
-                      onChange={(e) => handleInputChange('status', e.target.value as any)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                      required
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="restructuring">Restructuring</option>
-                    </select>
-                  </div>
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+                    Department Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
+                    placeholder="e.g., Operations"
+                    required
+                  />
                 </div>
 
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                    <User className="h-5 w-5 text-green-500" />
-                    Management & Budget
-                  </h3>
-                  
-                  <div>
-                    <label htmlFor="manager" className="block text-sm font-medium text-slate-700 mb-2">
-                      Department Manager *
-                    </label>
-                    <input
-                      type="text"
-                      id="manager"
-                      value={formData.manager}
-                      onChange={(e) => handleInputChange('manager', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                      placeholder="Manager name"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="location" className="block text-sm font-medium text-slate-700 mb-2">
-                      Location *
-                    </label>
-                    <input
-                      type="text"
-                      id="location"
-                      value={formData.location}
-                      onChange={(e) => handleInputChange('location', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                      placeholder="e.g., Dar es Salaam"
-                      required
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="budget" className="block text-sm font-medium text-slate-700 mb-2">
-                        Annual Budget (TZS) *
-                      </label>
-                      <input
-                        type="number"
-                        id="budget"
-                        value={formData.budget}
-                        onChange={(e) => handleInputChange('budget', e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                        placeholder="0"
-                        min="0"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="employeeCount" className="block text-sm font-medium text-slate-700 mb-2">
-                        Employee Count *
-                      </label>
-                      <input
-                        type="number"
-                        id="employeeCount"
-                        value={formData.employeeCount}
-                        onChange={(e) => handleInputChange('employeeCount', e.target.value)}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                        placeholder="0"
-                        min="0"
-                        required
-                      />
-                    </div>
-                  </div>
+                <div>
+                  <label htmlFor="branch" className="block text-sm font-medium text-slate-700 mb-2">
+                    Select Branch *
+                  </label>
+                  <select
+                    id="branch"
+                    value={formData.branchId}
+                    onChange={(e) => handleBranchChange(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
+                    required
+                  >
+                    <option value="">Choose a branch</option>
+                    {branches.map((branch) => (
+                      <option key={branch.id} value={branch.id}>
+                        {branch.name} - {branch.city}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
 
-              {/* Description */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-purple-500" />
-                  Description
-                </h3>
-                
+                {formData.branchName && (
+                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-800">
+                        Selected Branch: {formData.branchName}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-2">
+                    Department Code *
+                  </label>
+                  <input
+                    type="text"
+                    id="code"
+                    value={formData.code}
+                    onChange={(e) => handleInputChange('code', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
+                    placeholder="e.g., OPS"
+                    maxLength={5}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="location" className="block text-sm font-medium text-slate-700 mb-2">
+                    Location *
+                  </label>
+                  <input
+                    type="text"
+                    id="location"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange('location', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
+                    placeholder="e.g., Dar es Salaam"
+                    required
+                  />
+                </div>
+
                 <div>
                   <label htmlFor="description" className="block text-sm font-medium text-slate-700 mb-2">
-                    Department Description *
+                    Description
                   </label>
                   <textarea
                     id="description"
@@ -821,7 +771,6 @@ export default function DepartmentsPage() {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
                     rows={4}
                     placeholder="Describe the department's responsibilities and functions"
-                    required
                   />
                 </div>
               </div>
@@ -849,7 +798,7 @@ export default function DepartmentsPage() {
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Department
+                      Add Department
                     </>
                   )}
                 </Button>

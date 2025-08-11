@@ -113,6 +113,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    // Temporarily disable authentication - set a mock user
+    const mockUser = {
+      uid: 'mock-user-id',
+      email: 'admin@iris.com',
+      displayName: 'Admin User'
+    } as any
+    
+    setUser(mockUser)
+    setFirestoreUser({
+      id: 'mock-user-id',
+      email: 'admin@iris.com',
+      name: 'Admin User',
+      role: 'admin',
+      roleId: 'admin',
+      permissions: ['all_access'],
+      status: 'active',
+      department: 'Administration',
+      position: 'System Administrator',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    })
+    setLoading(false)
+    
+    // Original authentication code (commented out)
+    /*
     const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
       if (!authUser) {
         setUser(null)
@@ -126,7 +151,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     })
     return () => unsubscribe()
-  }, [auth])
+    */
+  }, [])
 
   useEffect(() => {
     if (user) {

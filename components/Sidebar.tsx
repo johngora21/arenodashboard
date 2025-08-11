@@ -38,16 +38,23 @@ import { getUserFeatures, SIDEBAR_FEATURES } from '@/lib/firebase-service'
 const navigation = [
   { id: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { id: 'branches', name: 'Branches', href: '/branches', icon: Building2 },
+  { 
+    id: 'departments', 
+    name: 'Departments', 
+    href: '/departments', 
+    icon: Users,
+    subItems: [
+      { id: 'sales', name: 'Sales', href: '/sales', icon: TrendingUp },
+      { id: 'finance', name: 'Finance', href: '/finance', icon: DollarSign },
+      { id: 'inventory', name: 'Inventory', href: '/inventory', icon: Database },
+    ]
+  },
   { id: 'hr', name: 'HR', href: '/hr', icon: Briefcase },
   { id: 'crm', name: 'CRM', href: '/crm', icon: UserPlus },
   { id: 'projects', name: 'Projects', href: '/projects', icon: FileText },
   { id: 'tasks', name: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { id: 'finance', name: 'Finance', href: '/finance', icon: DollarSign },
-  { id: 'sales', name: 'Sales', href: '/sales', icon: TrendingUp },
-  { id: 'inventory', name: 'Inventory', href: '/inventory', icon: Database },
   { id: 'reports', name: 'Reports', href: '/reports', icon: BarChart3 },
   { id: 'events', name: 'Events', href: '/events', icon: Calendar },
-  { id: 'jobs', name: 'Jobs', href: '/jobs', icon: UserCheck },
 ]
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -139,22 +146,51 @@ export default function Sidebar() {
             ) : (
               filteredNavigation.map((item) => {
                 const isActive = pathname === item.href
+                const hasSubItems = item.subItems && item.subItems.length > 0
+                
                 return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`
-                      flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                      ${isActive 
-                        ? 'bg-orange-500 text-white' 
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                      }
-                    `}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                  </Link>
+                  <div key={item.name}>
+                    <Link
+                      href={item.href}
+                      className={`
+                        flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                        ${isActive 
+                          ? 'bg-orange-500 text-white' 
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                        }
+                      `}
+                      onClick={() => setSidebarOpen(false)}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                    
+                    {/* Render sub-items if they exist */}
+                    {hasSubItems && (
+                      <div className="ml-6 mt-1 space-y-1">
+                        {item.subItems.map((subItem) => {
+                          const isSubActive = pathname === subItem.href
+                          return (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              className={`
+                                flex items-center space-x-3 px-3 py-1 rounded-lg text-sm font-medium transition-colors
+                                ${isSubActive 
+                                  ? 'bg-orange-500 text-white' 
+                                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+                                }
+                              `}
+                              onClick={() => setSidebarOpen(false)}
+                            >
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.name}</span>
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
                 )
               })
             )}

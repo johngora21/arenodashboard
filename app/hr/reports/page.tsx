@@ -1,152 +1,158 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import Sidebar from "@/components/Sidebar"
-import Header from "@/components/Header"
-import { useAuth } from "@/components/AuthProvider"
-import { useRouter } from "next/navigation"
+import { useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  FileText, 
+  Package, 
   CheckCircle, 
   XCircle, 
   Clock, 
   Eye, 
-  Download,
-  Search,
-  Filter,
-  ArrowLeft,
-  AlertCircle,
-  TrendingUp,
-  BarChart3,
-  Users,
-  Package,
-  Truck,
-  Building,
+  Search, 
+  Plus,
   Calendar,
+  User,
+  Building2,
   DollarSign,
-  Activity
-} from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { 
-  getAllReports,
-  approveReport,
-  rejectReport,
-  deleteReport,
-  Report
-} from "@/lib/firebase-service"
+  Truck,
+  FileText,
+  ArrowRight,
+  History,
+  Settings
+} from 'lucide-react'
+import Header from '@/components/Header'
+import Sidebar from '@/components/Sidebar'
 
 export default function HRReportsPage() {
-  const { user, loading: authLoading } = useAuth()
-  const router = useRouter()
-  const [reports, setReports] = useState<Report[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null)
-  const [approving, setApproving] = useState<string | null>(null)
-  const [rejecting, setRejecting] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('pending')
+  const [searchTerm, setSearchTerm] = useState('')
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login')
+  // Mock data
+  const pendingApprovals = [
+    {
+      id: '1',
+      type: 'purchase',
+      title: 'Office Supplies Purchase Request',
+      description: 'Request for office supplies including paper, pens, and printer cartridges',
+      requester: 'John Doe',
+      requesterRole: 'Office Manager',
+      department: 'Administration',
+      branch: 'Dar es Salaam Main',
+      totalValue: 1400000,
+      priority: 'medium',
+      status: 'pending',
+      submittedAt: '2024-01-15T10:30:00Z'
+    },
+    {
+      id: '2',
+      type: 'transfer',
+      title: 'Equipment Transfer to Mwanza Branch',
+      description: 'Transfer of 5 laptops and 3 printers to support new branch operations',
+      requester: 'Sarah Johnson',
+      requesterRole: 'IT Manager',
+      department: 'Information Technology',
+      branch: 'Mwanza Branch',
+      totalValue: 7350000,
+      priority: 'high',
+      status: 'pending',
+      submittedAt: '2024-01-14T14:20:00Z'
     }
-  }, [user, authLoading, router])
+  ]
 
-  useEffect(() => {
-    if (true) { // Temporarily disabled authentication
-      loadReports()
+  const approvedApprovals = [
+    {
+      id: '3',
+      type: 'purchase',
+      title: 'Safety Equipment Purchase',
+      description: 'Purchase of safety helmets, vests, and gloves for construction team',
+      requester: 'David Brown',
+      requesterRole: 'Safety Officer',
+      department: 'Safety',
+      branch: 'Dar es Salaam Main',
+      totalValue: 1500000,
+      priority: 'high',
+      status: 'approved',
+      submittedAt: '2024-01-10T11:00:00Z',
+      approvedAt: '2024-01-12T15:30:00Z',
+      approvedBy: 'Jane Smith',
+      comments: 'Approved - Safety equipment is essential for compliance'
     }
-  }, [user])
+  ]
 
-  const loadReports = async () => {
-    try {
-      setLoading(true)
-      const reportsData = await getAllReports()
-      setReports(reportsData)
-    } catch (error) {
-      console.error('Error loading reports:', error)
-    } finally {
-      setLoading(false)
+  const rejectedApprovals = [
+    {
+      id: '4',
+      type: 'disposal',
+      title: 'Old Furniture Disposal',
+      description: 'Disposal of old office furniture to make space for new equipment',
+      requester: 'Lisa Chen',
+      requesterRole: 'Facilities Manager',
+      department: 'Facilities',
+      branch: 'Dar es Salaam Main',
+      totalValue: 0,
+      priority: 'low',
+      status: 'rejected',
+      submittedAt: '2024-01-08T16:45:00Z',
+      approvedAt: '2024-01-09T10:20:00Z',
+      approvedBy: 'Robert Johnson',
+      comments: 'Rejected - Items can be refurbished and reused instead of disposal'
+    }
+  ]
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'purchase': return <Package className="h-4 w-4" />
+      case 'transfer': return <Truck className="h-4 w-4" />
+      case 'adjustment': return <Settings className="h-4 w-4" />
+      case 'disposal': return <XCircle className="h-4 w-4" />
+      case 'return': return <ArrowRight className="h-4 w-4" />
+      default: return <FileText className="h-4 w-4" />
     }
   }
 
-  const handleApproveReport = async (reportId: string) => {
-    try {
-      setApproving(reportId)
-      await approveReport(reportId, user?.email || '')
-      await loadReports()
-    } catch (error) {
-      console.error('Error approving report:', error)
-    } finally {
-      setApproving(null)
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'purchase': return 'bg-blue-100 text-blue-700'
+      case 'transfer': return 'bg-green-100 text-green-700'
+      case 'adjustment': return 'bg-orange-100 text-orange-700'
+      case 'disposal': return 'bg-red-100 text-red-700'
+      case 'return': return 'bg-purple-100 text-purple-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  const handleRejectReport = async (reportId: string) => {
-    try {
-      setRejecting(reportId)
-      await rejectReport(reportId, user?.email || '')
-      await loadReports()
-    } catch (error) {
-      console.error('Error rejecting report:', error)
-    } finally {
-      setRejecting(null)
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'bg-red-100 text-red-700'
+      case 'high': return 'bg-orange-100 text-orange-700'
+      case 'medium': return 'bg-yellow-100 text-yellow-700'
+      case 'low': return 'bg-green-100 text-green-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'approved':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'pending': return 'bg-yellow-100 text-yellow-700'
+      case 'approved': return 'bg-green-100 text-green-700'
+      case 'rejected': return 'bg-red-100 text-red-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Clock className="h-4 w-4" />
-      case 'approved':
-        return <CheckCircle className="h-4 w-4" />
-      case 'rejected':
-        return <XCircle className="h-4 w-4" />
-      default:
-        return <Clock className="h-4 w-4" />
-    }
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'TZS',
+      minimumFractionDigits: 0
+    }).format(amount)
   }
 
-  const getDepartmentIcon = (department: string) => {
-    switch (department.toLowerCase()) {
-      case 'hr':
-        return <Users className="h-5 w-5" />
-      case 'inventory':
-        return <Package className="h-5 w-5" />
-      case 'logistics':
-        return <Truck className="h-5 w-5" />
-      case 'operations':
-        return <Building className="h-5 w-5" />
-      default:
-        return <FileText className="h-5 w-5" />
-    }
-  }
-
-  const formatDate = (timestamp: any) => {
-    if (timestamp?.toDate) {
-      return new Date(timestamp.toDate()).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-    return new Date(timestamp).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -155,253 +161,321 @@ export default function HRReportsPage() {
     })
   }
 
-  const filteredReports = reports.filter(report => {
-    const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         report.submittedBy.toLowerCase().includes(searchTerm.toLowerCase())
-    
-    const matchesStatus = statusFilter === 'all' || report.status === statusFilter
-    
-    return matchesSearch && matchesStatus
-  })
-
-  const pendingCount = reports.filter(r => r.status === 'pending').length
-  const approvedCount = reports.filter(r => r.status === 'approved').length
-  const rejectedCount = reports.filter(r => r.status === 'rejected').length
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-slate-600 font-medium">Loading reports...</p>
-          </div>
-        </div>
-      </div>
-    )
+  const getCurrentApprovals = () => {
+    switch (activeTab) {
+      case 'pending': return pendingApprovals
+      case 'approved': return approvedApprovals
+      case 'rejected': return rejectedApprovals
+      default: return []
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex">
       <Sidebar />
-      <div className="flex-1 lg:ml-0">
+      <div className="flex-1 flex flex-col lg:ml-0">
         <Header />
-        
-        <main className="p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Page Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    onClick={() => router.push('/hr')}
-                    className="text-slate-600 hover:text-slate-700"
-                  >
-                    <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back
-                  </Button>
-                  <div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">HR Reports</h1>
-                    <p className="text-slate-600">Review and approve reports from all departments</p>
-                  </div>
-                </div>
+        <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">HR Approvals</h1>
+                <p className="text-slate-600 mt-1 text-base">Review and manage HR-related approval requests</p>
               </div>
-            </div>
-
-            {/* Analytics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Reports</p>
-                    <p className="text-3xl font-bold text-slate-900">{reports.length}</p>
-                  </div>
-                  <div className="bg-blue-100 p-3 rounded-lg">
-                    <FileText className="h-6 w-6 text-blue-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Pending</p>
-                    <p className="text-3xl font-bold text-yellow-600">{pendingCount}</p>
-                  </div>
-                  <div className="bg-yellow-100 p-3 rounded-lg">
-                    <Clock className="h-6 w-6 text-yellow-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Approved</p>
-                    <p className="text-3xl font-bold text-green-600">{approvedCount}</p>
-                  </div>
-                  <div className="bg-green-100 p-3 rounded-lg">
-                    <CheckCircle className="h-6 w-6 text-green-600" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Rejected</p>
-                    <p className="text-3xl font-bold text-red-600">{rejectedCount}</p>
-                  </div>
-                  <div className="bg-red-100 p-3 rounded-lg">
-                    <XCircle className="h-6 w-6 text-red-600" />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Filters */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
-                    <input
-                      type="text"
-                      placeholder="Search reports..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    variant={statusFilter === 'all' ? 'default' : 'outline'}
-                    onClick={() => setStatusFilter('all')}
-                    size="sm"
-                  >
-                    All
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'pending' ? 'default' : 'outline'}
-                    onClick={() => setStatusFilter('pending')}
-                    size="sm"
-                    className="bg-yellow-500 hover:bg-yellow-600"
-                  >
-                    <Clock className="h-4 w-4 mr-1" />
-                    Pending
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'approved' ? 'default' : 'outline'}
-                    onClick={() => setStatusFilter('approved')}
-                    size="sm"
-                    className="bg-green-500 hover:bg-green-600"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Approved
-                  </Button>
-                  <Button
-                    variant={statusFilter === 'rejected' ? 'default' : 'outline'}
-                    onClick={() => setStatusFilter('rejected')}
-                    size="sm"
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    <XCircle className="h-4 w-4 mr-1" />
-                    Rejected
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            {/* Reports List */}
-            <div className="bg-white rounded-xl shadow-lg">
-              <div className="p-6 border-b border-slate-200">
-                <h2 className="text-xl font-semibold text-slate-900">Department Reports</h2>
-              </div>
-              
-              <div className="p-6">
-                {filteredReports.length > 0 ? (
-                  <div className="space-y-4">
-                    {filteredReports.map((report) => (
-                      <div key={report.id} className="border rounded-lg p-6 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-start gap-4">
-                            <div className="bg-slate-100 p-3 rounded-lg">
-                              {getDepartmentIcon(report.department)}
-                            </div>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-lg font-semibold text-slate-900">{report.title}</h3>
-                                <Badge className={`${getStatusColor(report.status)}`}>
-                                  {getStatusIcon(report.status)}
-                                  <span className="ml-1 capitalize">{report.status}</span>
-                                </Badge>
-                              </div>
-                              <p className="text-slate-600 mb-2">{report.description}</p>
-                              <div className="flex items-center gap-4 text-sm text-slate-500">
-                                <span>Department: {report.department}</span>
-                                <span>Type: {report.reportType}</span>
-                                <span>Submitted by: {report.submittedBy}</span>
-                                <span>Date: {formatDate(report.submittedAt)}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSelectedReport(report)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                            
-                            {report.status === 'pending' && (
-                              <>
-                                <Button
-                                  onClick={() => handleApproveReport(report.id)}
-                                  disabled={approving === report.id}
-                                  size="sm"
-                                  className="bg-green-600 hover:bg-green-700"
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  {approving === report.id ? 'Approving...' : 'Approve'}
-                                </Button>
-                                <Button
-                                  onClick={() => handleRejectReport(report.id)}
-                                  disabled={rejecting === report.id}
-                                  size="sm"
-                                  variant="destructive"
-                                >
-                                  <XCircle className="h-4 w-4 mr-1" />
-                                  {rejecting === report.id ? 'Rejecting...' : 'Reject'}
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-slate-900 mb-2">No reports found</h3>
-                    <p className="text-slate-500">
-                      {searchTerm || statusFilter !== 'all' 
-                        ? 'No reports match your current filters.' 
-                        : 'No reports have been submitted yet.'}
-                    </p>
-                  </div>
-                )}
+              <div className="flex gap-2">
+                <Button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600">
+                  <Plus className="h-4 w-4" />
+                  New Request
+                </Button>
               </div>
             </div>
           </div>
+
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">Pending Approvals</p>
+                    <p className="text-2xl font-bold text-slate-900">{pendingApprovals.length}</p>
+                    <p className="text-xs text-yellow-600">Requires attention</p>
+                  </div>
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                    <Clock className="h-6 w-6 text-yellow-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">Approved Today</p>
+                    <p className="text-2xl font-bold text-slate-900">{approvedApprovals.length}</p>
+                    <p className="text-xs text-green-600">This week</p>
+                  </div>
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">Total Value</p>
+                    <p className="text-2xl font-bold text-slate-900">{formatCurrency(pendingApprovals.reduce((sum, a) => sum + a.totalValue, 0))}</p>
+                    <p className="text-xs text-blue-600">Pending requests</p>
+                  </div>
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <DollarSign className="h-6 w-6 text-blue-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-slate-600">Avg. Response Time</p>
+                    <p className="text-2xl font-bold text-slate-900">2.3h</p>
+                    <p className="text-xs text-purple-600">Last 30 days</p>
+                  </div>
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <Clock className="h-6 w-6 text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Controls */}
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search approvals, requesters, or items..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="pending" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Pending ({pendingApprovals.length})
+              </TabsTrigger>
+              <TabsTrigger value="approved" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Approved ({approvedApprovals.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Rejected ({rejectedApprovals.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="pending" className="space-y-4">
+              <div className="grid gap-4">
+                {getCurrentApprovals().map((approval) => (
+                  <Card key={approval.id} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
+                              {getTypeIcon(approval.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
+                                <Badge className={getPriorityColor(approval.priority)}>
+                                  {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)}
+                                </Badge>
+                                <Badge className={getStatusColor(approval.status)}>
+                                  Pending
+                                </Badge>
+                              </div>
+                              <p className="text-slate-600 mb-3">{approval.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  {approval.requester} ({approval.requesterRole})
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Building2 className="h-4 w-4" />
+                                  {approval.department} - {approval.branch}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {formatDate(approval.submittedAt)}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  {formatCurrency(approval.totalValue)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Button>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                            <CheckCircle className="h-4 w-4" />
+                            Approve
+                          </Button>
+                          <Button size="sm" variant="destructive">
+                            <XCircle className="h-4 w-4" />
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="approved" className="space-y-4">
+              <div className="grid gap-4">
+                {getCurrentApprovals().map((approval) => (
+                  <Card key={approval.id} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
+                              {getTypeIcon(approval.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
+                                <Badge className={getPriorityColor(approval.priority)}>
+                                  {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)}
+                                </Badge>
+                                <Badge className={getStatusColor(approval.status)}>
+                                  Approved
+                                </Badge>
+                              </div>
+                              <p className="text-slate-600 mb-3">{approval.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  {approval.requester} ({approval.requesterRole})
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Building2 className="h-4 w-4" />
+                                  {approval.department} - {approval.branch}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  Approved: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  By: {approval.approvedBy || 'N/A'}
+                                </div>
+                              </div>
+                              {approval.comments && (
+                                <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                                  <p className="text-sm text-green-800"><strong>Comment:</strong> {approval.comments}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="rejected" className="space-y-4">
+              <div className="grid gap-4">
+                {getCurrentApprovals().map((approval) => (
+                  <Card key={approval.id} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
+                              {getTypeIcon(approval.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
+                                <Badge className={getPriorityColor(approval.priority)}>
+                                  {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)}
+                                </Badge>
+                                <Badge className={getStatusColor(approval.status)}>
+                                  Rejected
+                                </Badge>
+                              </div>
+                              <p className="text-slate-600 mb-3">{approval.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  {approval.requester} ({approval.requesterRole})
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Building2 className="h-4 w-4" />
+                                  {approval.department} - {approval.branch}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  Rejected: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  By: {approval.approvedBy || 'N/A'}
+                                </div>
+                              </div>
+                              {approval.comments && (
+                                <div className="mt-3 p-3 bg-red-50 rounded-lg">
+                                  <p className="text-sm text-red-800"><strong>Reason:</strong> {approval.comments}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     </div>

@@ -1,393 +1,483 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import Sidebar from "@/components/Sidebar"
-import Header from "@/components/Header"
-import { useAuth } from "@/components/AuthProvider"
-import { useRouter } from "next/navigation"
+import { useState } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
-  CheckCircle,
-  XCircle,
-  Clock,
-  AlertCircle,
-  DollarSign,
-  FileText,
+  Package, 
+  CheckCircle, 
+  XCircle, 
+  Clock, 
+  Eye, 
+  Search, 
+  Plus,
   Calendar,
-  ArrowLeft,
-  Filter,
-  Search,
-  RefreshCw,
-  Eye,
-  TrendingUp,
-  CreditCard,
-  Receipt,
-  Building,
-  BarChart3
-} from "lucide-react"
-import { 
-  getPendingApprovalsByDepartment,
-  approveRequest,
-  rejectRequest,
-  getApprovalsByDepartment,
-  getApprovalHistoryByDepartmentAndStatus
-} from "@/lib/firebase-service"
-import { Badge } from "@/components/ui/badge"
-
-interface ApprovalRequest {
-  id: string
-  type: 'expense_approval' | 'budget_approval' | 'payment_approval'
-  status: 'pending' | 'approved' | 'rejected'
-  requestedBy: string
-  requestedAt: any
-  department: string
-  priority: 'low' | 'medium' | 'high'
-  description: string
-  data: any
-  approvedBy?: string
-  approvedAt?: any
-  comments?: string
-}
+  User,
+  Building2,
+  DollarSign,
+  Truck,
+  FileText,
+  ArrowRight,
+  History,
+  Settings
+} from 'lucide-react'
+import Header from '@/components/Header'
+import Sidebar from '@/components/Sidebar'
 
 export default function FinanceApprovalsPage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  
-  const [pendingApprovals, setPendingApprovals] = useState<any[]>([])
-  const [approvedApprovals, setApprovedApprovals] = useState<any[]>([])
-  const [rejectedApprovals, setRejectedApprovals] = useState<any[]>([])
-  const [dataLoading, setDataLoading] = useState(true)
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
+  const [activeTab, setActiveTab] = useState('pending')
+  const [searchTerm, setSearchTerm] = useState('')
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (false) { // Temporarily disabled authentication
-      router.push('/login')
+  // Mock data
+  const pendingApprovals = [
+    {
+      id: '1',
+      type: 'purchase',
+      title: 'Office Supplies Purchase Request',
+      description: 'Request for office supplies including paper, pens, and printer cartridges',
+      requester: 'John Doe',
+      requesterRole: 'Office Manager',
+      department: 'Administration',
+      branch: 'Dar es Salaam Main',
+      totalValue: 1400000,
+      priority: 'medium',
+      status: 'pending',
+      submittedAt: '2024-01-15T10:30:00Z'
+    },
+    {
+      id: '2',
+      type: 'transfer',
+      title: 'Equipment Transfer to Mwanza Branch',
+      description: 'Transfer of 5 laptops and 3 printers to support new branch operations',
+      requester: 'Sarah Johnson',
+      requesterRole: 'IT Manager',
+      department: 'Information Technology',
+      branch: 'Mwanza Branch',
+      totalValue: 7350000,
+      priority: 'high',
+      status: 'pending',
+      submittedAt: '2024-01-14T14:20:00Z'
     }
-  }, [user, loading, router])
+  ]
 
-  useEffect(() => {
-    if (true) { // Temporarily disabled authentication
-      loadAllApprovals()
+  const approvedApprovals = [
+    {
+      id: '3',
+      type: 'purchase',
+      title: 'Safety Equipment Purchase',
+      description: 'Purchase of safety helmets, vests, and gloves for construction team',
+      requester: 'David Brown',
+      requesterRole: 'Safety Officer',
+      department: 'Safety',
+      branch: 'Dar es Salaam Main',
+      totalValue: 1500000,
+      priority: 'high',
+      status: 'approved',
+      submittedAt: '2024-01-10T11:00:00Z',
+      approvedAt: '2024-01-12T15:30:00Z',
+      approvedBy: 'Jane Smith',
+      comments: 'Approved - Safety equipment is essential for compliance'
     }
-  }, [user])
+  ]
 
-  const loadAllApprovals = async () => {
-    try {
-      setDataLoading(true)
-      const [pending, approved, rejected] = await Promise.all([
-        getApprovalsByDepartment('finance'),
-        getApprovalHistoryByDepartmentAndStatus('finance', 'approved'),
-        getApprovalHistoryByDepartmentAndStatus('finance', 'rejected'),
-      ])
-      
-      // Normalize all approvals to have the same structure
-      const normalize = (arr: any[], status: string) => arr.map(approval => ({
-        id: approval.id,
-        status: approval.status || status,
-        description: approval.description ||
-          (approval.requestType === 'expenses' ? `Expense approval for shipment ${approval.shipmentNumber}` :
-          approval.requestType === 'budget' ? `Budget approval for ${approval.shipmentNumber}` :
-          `Payment approval for shipment ${approval.shipmentNumber}`),
-        requestedBy: approval.requestedBy,
-        requestedAt: approval.requestedAt,
-        approvedBy: approval.approvedBy,
-        rejectedBy: approval.rejectedBy,
-        data: {
-          ...(approval.expensesData ? { expensesData: approval.expensesData } : {}),
-          ...(approval.budgetData ? { budgetData: approval.budgetData } : {}),
-          ...(approval.paymentData ? { paymentData: approval.paymentData } : {}),
-          ...(approval.data ? approval.data : {})
-        },
-      }))
-      
-      setPendingApprovals(normalize(pending, 'pending'))
-      setApprovedApprovals(normalize(approved, 'approved'))
-      setRejectedApprovals(normalize(rejected, 'rejected'))
-    } catch (err) {
-      console.error('Error loading approvals:', err)
-    } finally {
-      setDataLoading(false)
+  const rejectedApprovals = [
+    {
+      id: '4',
+      type: 'disposal',
+      title: 'Old Furniture Disposal',
+      description: 'Disposal of old office furniture to make space for new equipment',
+      requester: 'Lisa Chen',
+      requesterRole: 'Facilities Manager',
+      department: 'Facilities',
+      branch: 'Dar es Salaam Main',
+      totalValue: 0,
+      priority: 'low',
+      status: 'rejected',
+      submittedAt: '2024-01-08T16:45:00Z',
+      approvedAt: '2024-01-09T10:20:00Z',
+      approvedBy: 'Robert Johnson',
+      comments: 'Rejected - Items can be refurbished and reused instead of disposal'
+    }
+  ]
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'purchase': return <Package className="h-4 w-4" />
+      case 'transfer': return <Truck className="h-4 w-4" />
+      case 'adjustment': return <Settings className="h-4 w-4" />
+      case 'disposal': return <XCircle className="h-4 w-4" />
+      case 'return': return <ArrowRight className="h-4 w-4" />
+      default: return <FileText className="h-4 w-4" />
     }
   }
 
-  const handleApprove = async (approvalId: string) => {
-    try {
-      console.log('Approving request:', approvalId)
-      await approveRequest(approvalId, user?.email || 'Unknown')
-      console.log('Request approved successfully')
-      alert('Request approved successfully!')
-    } catch (error) {
-      console.error('Error approving request:', error)
-      alert(`Failed to approve request: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      await loadAllApprovals()
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'purchase': return 'bg-blue-100 text-blue-700'
+      case 'transfer': return 'bg-green-100 text-green-700'
+      case 'adjustment': return 'bg-orange-100 text-orange-700'
+      case 'disposal': return 'bg-red-100 text-red-700'
+      case 'return': return 'bg-purple-100 text-purple-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  const handleReject = async (approvalId: string) => {
-    try {
-      console.log('Rejecting request:', approvalId)
-      await rejectRequest(approvalId, user?.email || 'Unknown', 'Rejected by Finance')
-      console.log('Request rejected successfully')
-      alert('Request rejected successfully!')
-    } catch (error) {
-      console.error('Error rejecting request:', error)
-      alert(`Failed to reject request: ${error instanceof Error ? error.message : 'Unknown error'}`)
-    } finally {
-      await loadAllApprovals()
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'bg-red-100 text-red-700'
+      case 'high': return 'bg-orange-100 text-orange-700'
+      case 'medium': return 'bg-yellow-100 text-yellow-700'
+      case 'low': return 'bg-green-100 text-green-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'approved':
-        return 'bg-green-100 text-green-800'
-      case 'rejected':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
+      case 'pending': return 'bg-yellow-100 text-yellow-700'
+      case 'approved': return 'bg-green-100 text-green-700'
+      case 'rejected': return 'bg-red-100 text-red-700'
+      default: return 'bg-gray-100 text-gray-700'
     }
   }
 
-  const formatDate = (date: any) => {
-    if (!date) return 'N/A'
-    const d = date instanceof Date ? date : date.toDate()
-    return d.toLocaleDateString() + ' ' + d.toLocaleTimeString()
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'TZS',
+      minimumFractionDigits: 0
+    }).format(amount)
   }
 
-  // Combine all approvals into one array
-  const allApprovals = [
-    ...pendingApprovals,
-    ...approvedApprovals,
-    ...rejectedApprovals
-  ]
-
-  // Filtering
-  let filteredApprovals: any[] = []
-  if (selectedStatus === 'pending') filteredApprovals = allApprovals.filter(a => a.status === 'pending')
-  else if (selectedStatus === 'approved') filteredApprovals = allApprovals.filter(a => a.status === 'approved')
-  else if (selectedStatus === 'rejected') filteredApprovals = allApprovals.filter(a => a.status === 'rejected')
-  else filteredApprovals = allApprovals
-
-  // Analytics
-  const total = pendingApprovals.length + approvedApprovals.length + rejectedApprovals.length
-  const pending = pendingApprovals.length
-  const approved = approvedApprovals.length
-  const rejected = rejectedApprovals.length
-
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-slate-600 font-medium">Loading authentication...</p>
-          </div>
-        </div>
-      </div>
-    )
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
   }
 
-  // Show loading while not authenticated (will redirect)
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm mx-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-slate-600 font-medium">Redirecting to login...</p>
-          </div>
-        </div>
-      </div>
-    )
+  const getCurrentApprovals = () => {
+    switch (activeTab) {
+      case 'pending': return pendingApprovals
+      case 'approved': return approvedApprovals
+      case 'rejected': return rejectedApprovals
+      default: return []
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex">
       <Sidebar />
-      <div className="flex-1 lg:ml-0">
+      <div className="flex-1 flex flex-col lg:ml-0">
         <Header />
-        
-        <main className="p-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-8 flex items-center gap-4">
-              <Button variant="ghost" onClick={() => router.push('/finance')} className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Back to Finance
-              </Button>
+        <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-slate-900 mb-2">Finance Approvals</h1>
-                <p className="text-slate-600">Track and manage all finance approval requests</p>
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Finance Approvals</h1>
+                <p className="text-slate-600 mt-1 text-base">Review and manage finance-related approval requests</p>
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600">
+                  <Plus className="h-4 w-4" />
+                  New Request
+                </Button>
               </div>
             </div>
+          </div>
 
-            {/* Analytics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+          {/* Statistics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">Total Requests</p>
-                    <p className="text-2xl font-bold">{total}</p>
+                    <p className="text-sm font-medium text-slate-600">Pending Approvals</p>
+                    <p className="text-2xl font-bold text-slate-900">{pendingApprovals.length}</p>
+                    <p className="text-xs text-yellow-600">Requires attention</p>
                   </div>
-                  <DollarSign className="h-8 w-8 text-slate-400" />
+                  <div className="p-3 bg-yellow-100 rounded-lg">
+                    <Clock className="h-6 w-6 text-yellow-600" />
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">Pending</p>
-                    <p className="text-2xl font-bold text-yellow-600">{pending}</p>
+                    <p className="text-sm font-medium text-slate-600">Approved Today</p>
+                    <p className="text-2xl font-bold text-slate-900">{approvedApprovals.length}</p>
+                    <p className="text-xs text-green-600">This week</p>
                   </div>
-                  <Clock className="h-8 w-8 text-yellow-400" />
+                  <div className="p-3 bg-green-100 rounded-lg">
+                    <CheckCircle className="h-6 w-6 text-green-600" />
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">Approved</p>
-                    <p className="text-2xl font-bold text-green-600">{approved}</p>
+                    <p className="text-sm font-medium text-slate-600">Total Value</p>
+                    <p className="text-2xl font-bold text-slate-900">{formatCurrency(pendingApprovals.reduce((sum, a) => sum + a.totalValue, 0))}</p>
+                    <p className="text-xs text-blue-600">Pending requests</p>
                   </div>
-                  <CheckCircle className="h-8 w-8 text-green-400" />
+                  <div className="p-3 bg-blue-100 rounded-lg">
+                    <DollarSign className="h-6 w-6 text-blue-600" />
+                  </div>
                 </div>
-              </div>
-              <div className="bg-white rounded-xl p-6 shadow-lg">
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-slate-600">Rejected</p>
-                    <p className="text-2xl font-bold text-red-600">{rejected}</p>
+                    <p className="text-sm font-medium text-slate-600">Avg. Response Time</p>
+                    <p className="text-2xl font-bold text-slate-900">2.3h</p>
+                    <p className="text-xs text-purple-600">Last 30 days</p>
                   </div>
-                  <XCircle className="h-8 w-8 text-red-400" />
+                  <div className="p-3 bg-purple-100 rounded-lg">
+                    <Clock className="h-6 w-6 text-purple-600" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Controls */}
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 flex-1">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search approvals, requesters, or items..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Status Tabs */}
-            <div className="flex gap-2 mb-6">
-              <Button variant={selectedStatus === 'pending' ? 'default' : 'outline'} onClick={() => setSelectedStatus('pending')}>Pending</Button>
-              <Button variant={selectedStatus === 'approved' ? 'default' : 'outline'} onClick={() => setSelectedStatus('approved')}>Approved</Button>
-              <Button variant={selectedStatus === 'rejected' ? 'default' : 'outline'} onClick={() => setSelectedStatus('rejected')}>Rejected</Button>
-              <Button variant={selectedStatus === 'all' ? 'default' : 'outline'} onClick={() => setSelectedStatus('all')}>All</Button>
-            </div>
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="pending" className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                Pending ({pendingApprovals.length})
+              </TabsTrigger>
+              <TabsTrigger value="approved" className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                Approved ({approvedApprovals.length})
+              </TabsTrigger>
+              <TabsTrigger value="rejected" className="flex items-center gap-2">
+                <XCircle className="h-4 w-4" />
+                Rejected ({rejectedApprovals.length})
+              </TabsTrigger>
+            </TabsList>
 
-            {/* Approval List Rendering */}
-            {dataLoading ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
-                <p className="text-slate-600">Loading approvals...</p>
-              </div>
-            ) : filteredApprovals.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-slate-500">No approvals found for this status.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredApprovals.map((approval) => {
-                  // Only show action buttons if this approval is in pendingApprovals (i.e., from approvalRequests)
-                  const isTrulyPending = approval.status === 'pending' && pendingApprovals.some((a: any) => a.id === approval.id)
-                  return (
-                    <div key={approval.id} className="border rounded-lg p-4 mb-4 bg-white shadow-sm">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-semibold">{approval.description || 'Finance Approval Request'}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            Requested by {approval.requestedBy || 'Unknown'} on {approval.requestedAt?.toDate ? new Date(approval.requestedAt.toDate()).toLocaleDateString() : ''}
-                          </p>
-                        </div>
-                        <Badge variant="secondary" className={
-                          approval.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          approval.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }>
-                          {approval.status.charAt(0).toUpperCase() + approval.status.slice(1)}
-                        </Badge>
-                      </div>
-
-                      {/* Expenses Data */}
-                      {approval.data?.expensesData && (
-                        <div className="space-y-2">
-                          <h5 className="font-medium text-purple-700">Expenses Requested:</h5>
-                          <div className="space-y-2">
-                            {approval.data.expensesData.expenses?.map((expense: any, index: number) => (
-                              <div key={index} className="flex justify-between items-center p-2 bg-purple-50 rounded">
-                                <span className="font-medium">{expense.description}</span>
-                                <span className="text-sm font-semibold">
-                                  TZS {expense.amount.toLocaleString()}
-                                </span>
+            <TabsContent value="pending" className="space-y-4">
+              <div className="grid gap-4">
+                {getCurrentApprovals().map((approval) => (
+                  <Card key={approval.id} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
+                              {getTypeIcon(approval.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
+                                <Badge className={getPriorityColor(approval.priority)}>
+                                  {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)}
+                                </Badge>
+                                <Badge className={getStatusColor(approval.status)}>
+                                  Pending
+                                </Badge>
                               </div>
-                            ))}
-                          </div>
-                          <div className="mt-3 pt-3 border-t">
-                            <p className="text-sm font-medium">
-                              Total Amount: TZS {approval.data.expensesData.totalAmount.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Budget Data */}
-                      {approval.data?.budgetData && (
-                        <div className="space-y-2">
-                          <h5 className="font-medium text-blue-700">Budget Request:</h5>
-                          <div className="text-sm">
-                            <div>Budget Type: {approval.data.budgetData.type}</div>
-                            <div>Amount: TZS {approval.data.budgetData.amount.toLocaleString()}</div>
-                            <div>Purpose: {approval.data.budgetData.purpose}</div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Payment Data */}
-                      {approval.data?.paymentData && (
-                        <div className="space-y-2">
-                          <h5 className="font-medium text-green-700">Payment Request:</h5>
-                          <div className="text-sm">
-                            <div>Payment Type: {approval.data.paymentData.type}</div>
-                            <div>Amount: TZS {approval.data.paymentData.amount.toLocaleString()}</div>
-                            <div>Recipient: {approval.data.paymentData.recipient}</div>
+                              <p className="text-slate-600 mb-3">{approval.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  {approval.requester} ({approval.requesterRole})
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Building2 className="h-4 w-4" />
+                                  {approval.department} - {approval.branch}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  {formatDate(approval.submittedAt)}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <DollarSign className="h-4 w-4" />
+                                  {formatCurrency(approval.totalValue)}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      )}
-
-                      {/* Action buttons for pending approvals that are truly pending */}
-                      {isTrulyPending && (
-                        <div className="flex gap-3 mt-6 pt-6 border-t">
-                          <Button onClick={() => handleApprove(approval.id)} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Button>
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700">
                             <CheckCircle className="h-4 w-4" />
                             Approve
                           </Button>
-                          <Button onClick={() => handleReject(approval.id)} variant="destructive" className="flex items-center gap-2">
+                          <Button size="sm" variant="destructive">
                             <XCircle className="h-4 w-4" />
                             Reject
                           </Button>
                         </div>
-                      )}
-
-                      {/* Processed by info for non-pending */}
-                      {approval.status !== 'pending' && (
-                        <div className="mt-4 pt-4 border-t text-sm text-slate-500">
-                          {approval.status === 'approved' ? (
-                            <div>
-                              Approved by {approval.approvedBy} on {approval.approvedAt?.toDate ? new Date(approval.approvedAt.toDate()).toLocaleDateString() : 'N/A'}
-                            </div>
-                          ) : (
-                            <div>
-                              Rejected by {approval.rejectedBy} on {approval.rejectedAt?.toDate ? new Date(approval.rejectedAt.toDate()).toLocaleDateString() : 'N/A'}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            )}
-          </div>
+            </TabsContent>
+
+            <TabsContent value="approved" className="space-y-4">
+              <div className="grid gap-4">
+                {getCurrentApprovals().map((approval) => (
+                  <Card key={approval.id} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
+                              {getTypeIcon(approval.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
+                                <Badge className={getPriorityColor(approval.priority)}>
+                                  {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)}
+                                </Badge>
+                                <Badge className={getStatusColor(approval.status)}>
+                                  Approved
+                                </Badge>
+                              </div>
+                              <p className="text-slate-600 mb-3">{approval.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  {approval.requester} ({approval.requesterRole})
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Building2 className="h-4 w-4" />
+                                  {approval.department} - {approval.branch}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  Approved: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  By: {approval.approvedBy || 'N/A'}
+                                </div>
+                              </div>
+                              {approval.comments && (
+                                <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                                  <p className="text-sm text-green-800"><strong>Comment:</strong> {approval.comments}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="rejected" className="space-y-4">
+              <div className="grid gap-4">
+                {getCurrentApprovals().map((approval) => (
+                  <Card key={approval.id} className="bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-lg ${getTypeColor(approval.type)}`}>
+                              {getTypeIcon(approval.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-lg font-semibold text-slate-900">{approval.title}</h3>
+                                <Badge className={getPriorityColor(approval.priority)}>
+                                  {approval.priority.charAt(0).toUpperCase() + approval.priority.slice(1)}
+                                </Badge>
+                                <Badge className={getStatusColor(approval.status)}>
+                                  Rejected
+                                </Badge>
+                              </div>
+                              <p className="text-slate-600 mb-3">{approval.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  {approval.requester} ({approval.requesterRole})
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Building2 className="h-4 w-4" />
+                                  {approval.department} - {approval.branch}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-4 w-4" />
+                                  Rejected: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  By: {approval.approvedBy || 'N/A'}
+                                </div>
+                              </div>
+                              {approval.comments && (
+                                <div className="mt-3 p-3 bg-red-50 rounded-lg">
+                                  <p className="text-sm text-red-800"><strong>Reason:</strong> {approval.comments}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-4 w-4" />
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     </div>
   )
-} 
+}

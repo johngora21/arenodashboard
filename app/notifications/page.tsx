@@ -13,7 +13,6 @@ import {
   Settings, 
   Plus, 
   Search, 
-  Filter, 
   MoreVertical, 
   Eye, 
   Edit, 
@@ -25,6 +24,7 @@ import {
   Calendar, 
   DollarSign 
 } from "lucide-react";
+import { FilterIcon } from "@/components/ui/filter-icon";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 
@@ -43,7 +43,7 @@ export default function NotificationsPage() {
               </div>
               <div className="flex space-x-3">
                 <Button variant="outline" className="bg-white hover:bg-slate-50">
-                  <Filter className="h-4 w-4 mr-2" /> Filter
+                  <FilterIcon className="h-4 w-4 mr-2" /> Filter
                 </Button>
                 <Button className="bg-orange-500 hover:bg-orange-600">
                   <Plus className="h-4 w-4 mr-2" /> New Alert
@@ -194,7 +194,7 @@ export default function NotificationsPage() {
                     <CardTitle>Email Notifications</CardTitle>
                     <div className="flex space-x-2">
                       <Button variant="outline" size="sm">
-                        <Filter className="h-4 w-4 mr-2" /> Filter
+                        <FilterIcon className="h-4 w-4 mr-2" /> Filter
                       </Button>
                       <Button variant="outline" size="sm">
                         <Search className="h-4 w-4 mr-2" /> Search

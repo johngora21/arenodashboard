@@ -27,7 +27,8 @@ import {
   Database,
   BarChart3,
   TrendingUp,
-  Settings
+  Settings,
+  CheckCircle
 } from "lucide-react"
 
 export default function AdminDashboardPage() {
@@ -112,12 +113,21 @@ export default function AdminDashboardPage() {
           {/* Page Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
+              <div>
                 <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">iRis Dashboard</h1>
                 <p className="text-slate-600 mt-1 text-base">Welcome back, {(user && (user.displayName || user.email)) || 'Admin'}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button 
+                  onClick={() => router.push('/approvals')}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold px-6 py-2 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                >
+                  <CheckCircle className="h-5 w-5 mr-2" />
+                  Approvals
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

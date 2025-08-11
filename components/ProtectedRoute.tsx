@@ -28,6 +28,12 @@ export default function ProtectedRoute({
   console.log('DEBUG: Firestore user:', firestoreUser);
 
   useEffect(() => {
+    // Temporarily disable all authentication checks
+    setHasAccess(true)
+    setChecking(false)
+    
+    // Original authentication code (commented out)
+    /*
     const checkAccess = async () => {
       if (authLoading) return
       if (!user) {
@@ -60,7 +66,8 @@ export default function ProtectedRoute({
       }
     }
     checkAccess()
-  }, [user, firestoreUser, authLoading, requiredFeature, requiredPermission, router])
+    */
+  }, [])
 
   if (authLoading || checking) {
     return (

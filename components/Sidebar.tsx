@@ -38,17 +38,10 @@ import { getUserFeatures, SIDEBAR_FEATURES } from '@/lib/firebase-service'
 const navigation = [
   { id: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { id: 'branches', name: 'Branches', href: '/branches', icon: Building2 },
-  { 
-    id: 'departments', 
-    name: 'Departments', 
-    href: '/departments', 
-    icon: Users,
-    subItems: [
-      { id: 'sales', name: 'Sales', href: '/sales', icon: TrendingUp },
-      { id: 'finance', name: 'Finance', href: '/finance', icon: DollarSign },
-      { id: 'inventory', name: 'Inventory', href: '/inventory', icon: Database },
-    ]
-  },
+  { id: 'departments', name: 'Departments', href: '/departments', icon: Users },
+  { id: 'sales', name: 'Sales', href: '/sales', icon: TrendingUp },
+  { id: 'finance', name: 'Finance', href: '/finance', icon: DollarSign },
+  { id: 'inventory', name: 'Inventory', href: '/inventory', icon: Database },
   { id: 'hr', name: 'HR', href: '/hr', icon: Briefcase },
   { id: 'crm', name: 'CRM', href: '/crm', icon: UserPlus },
   { id: 'projects', name: 'Projects', href: '/projects', icon: FileText },
@@ -57,167 +50,75 @@ const navigation = [
   { id: 'events', name: 'Events', href: '/events', icon: Calendar },
   { id: 'settings', name: 'Settings', href: '/settings', icon: Settings },
 ]
+
 export default function Sidebar() {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [userFeatures, setUserFeatures] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
   const pathname = usePathname()
-  const { user, logout } = useAuth()
+  const { user, signOut } = useAuth()
 
-  useEffect(() => {
-    const loadUserFeatures = async () => {
-      if (user?.email) {
-        try {
-          const features = await getUserFeatures(user.email)
-          setUserFeatures(features)
-        } catch (error) {
-          console.error('Error loading user features:', error)
-          // If error, show all features (fallback)
-          setUserFeatures(Object.keys(SIDEBAR_FEATURES))
-        } finally {
-          setLoading(false)
-        }
-      } else {
-        setLoading(false)
-      }
+  const handleLogout = async () => {
+    try {
+      await signOut()
+      // The AuthProvider will handle the redirect to login
+    } catch (error) {
+      console.error('Error signing out:', error)
     }
-
-    loadUserFeatures()
-  }, [user?.email])
-
-  // Filter navigation based on user permissions
-  const filteredNavigation = navigation.filter(item => {
-    // Always show dashboard
-    if (item.id === 'dashboard') return true
-    
-    // If no features loaded yet, show all (fallback)
-    if (loading || userFeatures.length === 0) return true
-    
-    // Check if user has access to this feature
-    return userFeatures.includes(item.id)
-  })
+  }
 
   return (
-    <>
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:inset-auto
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between h-16 px-6 border-b border-slate-800">
-            <div className="flex items-center space-x-3">
-              <Image src="/images/iRis-logo.png" alt="iRis Logo" width={60} height={60} className="object-contain" />
-              <div>
-                <h1 className="text-lg font-bold text-white">iRis</h1>
-                <p className="text-xs text-slate-400">Technologies</p>
-              </div>
+    <div className="w-64 bg-slate-900 border-r border-slate-800 fixed left-0 top-0 h-screen overflow-hidden z-30">
+      <div className="flex flex-col h-full">
+        {/* Logo Section - Fixed height */}
+        <div className="h-20 p-4 border-b border-slate-800 flex-shrink-0">
+          <div className="flex items-center space-x-3">
+            <Image
+              src="/images/iRis-logo.png"
+              alt="iRis Logo"
+              width={60}
+              height={60}
+              className="rounded-lg"
+            />
+            <div>
+              <h1 className="text-xl font-bold text-white">iRis</h1>
+              <p className="text-xs text-slate-400">Technologies</p>
             </div>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-slate-400 hover:text-white"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-2">
-            {loading ? (
-              // Loading skeleton
-              <div className="space-y-2">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-3 px-3 py-2 rounded-lg">
-                    <div className="h-5 w-5 bg-slate-700 rounded animate-pulse"></div>
-                    <div className="h-4 bg-slate-700 rounded animate-pulse flex-1"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              filteredNavigation.map((item) => {
-                const isActive = pathname === item.href
-                const hasSubItems = item.subItems && item.subItems.length > 0
-                
-                return (
-                  <div key={item.name}>
-                    <Link
-                      href={item.href}
-                      className={`
-                        flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                        ${isActive 
-                          ? 'bg-orange-500 text-white' 
-                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                        }
-                      `}
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.name}</span>
-                    </Link>
-                    
-                    {/* Render sub-items if they exist */}
-                    {hasSubItems && (
-                      <div className="ml-6 mt-1 space-y-1">
-                        {item.subItems.map((subItem) => {
-                          const isSubActive = pathname === subItem.href
-                          return (
-                            <Link
-                              key={subItem.name}
-                              href={subItem.href}
-                              className={`
-                                flex items-center space-x-3 px-3 py-1 rounded-lg text-sm font-medium transition-colors
-                                ${isSubActive 
-                                  ? 'bg-orange-500 text-white' 
-                                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                                }
-                              `}
-                              onClick={() => setSidebarOpen(false)}
-                            >
-                              <subItem.icon className="h-4 w-4" />
-                              <span>{subItem.name}</span>
-                            </Link>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )
-              })
-            )}
-          </nav>
-
-          {/* Logout section */}
-          <div className="p-4 border-t border-slate-800 mt-auto">
-            <button 
-              className="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-orange-500 text-white font-semibold py-2 rounded-lg transition-colors border border-slate-800"
-              onClick={logout}
-              title="Sign Out"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
           </div>
         </div>
-      </div>
 
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="bg-slate-900 p-2 rounded-lg text-white"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        {/* Navigation - Takes remaining space */}
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <ul className="space-y-2">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <li key={item.id}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                      isActive 
+                        ? 'bg-orange-500 text-white' 
+                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }`}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span>{item.name}</span>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+
+        {/* Logout Section - Fixed at bottom */}
+        <div className="p-4 border-t border-slate-800 flex-shrink-0">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-slate-300 hover:bg-slate-800 hover:text-white"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
-    </>
-  )
+    </div>
+  );
 } 

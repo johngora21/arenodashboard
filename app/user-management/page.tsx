@@ -310,11 +310,11 @@ function UserManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Sidebar />
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className="ml-64 min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100">
+        <main className="flex-1 p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100 mt-16">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-slate-900 mb-2">User Management</h1>

@@ -651,12 +651,12 @@ export default function ApprovalsPage() {
   const departments = Array.from(new Set(approvals.map(a => a.department)))
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Sidebar />
-      <div className="flex-1 lg:ml-0">
+      <div className="ml-64 min-h-screen flex flex-col">
         <Header />
         
-        <main className="p-6">
+        <main className="flex-1 p-8 mt-16">
           <div className="max-w-4xl mx-auto">
             <div className="mb-8 flex items-center gap-4">
               <Button variant="ghost" onClick={() => router.push('/hr')} className="flex items-center gap-2">

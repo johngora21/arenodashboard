@@ -562,12 +562,12 @@ export default function ShipmentsReportsPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex overflow-hidden">
+    <div className="h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Sidebar />
-      <div className="flex-1 lg:ml-0 flex flex-col overflow-hidden">
+      <div className="ml-64 h-screen flex flex-col overflow-hidden">
         <Header />
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-8 mt-16">
           <div className="max-w-7xl mx-auto">
             {/* Page Header */}
             <div className="mb-8">

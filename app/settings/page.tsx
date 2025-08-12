@@ -15,7 +15,11 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Users,
+  Key,
+  UserCheck,
+  Lock
 } from 'lucide-react'
 
 interface SettingsSection {
@@ -26,6 +30,12 @@ interface SettingsSection {
 }
 
 const settingsSections: SettingsSection[] = [
+  {
+    id: 'user-access',
+    title: 'User Access Management',
+    icon: Users,
+    description: 'Manage user accounts, roles, and credentials'
+  },
   {
     id: 'personal',
     title: 'Personal Settings',
@@ -59,13 +69,13 @@ const settingsSections: SettingsSection[] = [
 ]
 
 export default function SettingsPage() {
-  const [activeSection, setActiveSection] = useState('personal')
-  const [showPassword, setShowPassword] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [activeSection, setActiveSection] = useState('user-access')
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [showUserModal, setShowUserModal] = useState(false)
 
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+  const handleUserClick = (user) => {
+    setSelectedUser(user)
+    setShowUserModal(true)
   }
 
   const renderPersonalSettings = () => (
@@ -396,103 +406,252 @@ export default function SettingsPage() {
     </div>
   )
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'personal':
-        return renderPersonalSettings()
-      case 'notifications':
-        return renderNotificationSettings()
-      case 'security':
-        return renderSecuritySettings()
-      case 'system':
-        return renderSystemSettings()
-      case 'integrations':
-        return renderIntegrationSettings()
-      default:
-        return renderPersonalSettings()
-    }
-  }
+  const renderUserAccessSettings = () => {
+    const users = [
+      { id: 1, name: 'John Doe', email: 'john.doe@company.com', department: 'Engineering', role: 'Developer', status: 'Active', lastLogin: '2 hours ago', avatar: 'JD' },
+      { id: 2, name: 'Jane Smith', email: 'jane.smith@company.com', department: 'HR', role: 'HR Manager', status: 'Active', lastLogin: '1 day ago', avatar: 'JS' },
+      { id: 3, name: 'Mike Johnson', email: 'mike.johnson@company.com', department: 'Sales', role: 'Sales Rep', status: 'Blocked', lastLogin: 'Never', avatar: 'MJ' },
+      { id: 4, name: 'Sarah Wilson', email: 'sarah.wilson@company.com', department: 'Finance', role: 'Accountant', status: 'Inactive', lastLogin: '3 days ago', avatar: 'SW' },
+      { id: 5, name: 'David Brown', email: 'david.brown@company.com', department: 'Marketing', role: 'Marketing Specialist', status: 'Pending', lastLogin: 'Never', avatar: 'DB' }
+    ];
 
-  return (
-    <div className="flex h-screen bg-slate-50">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Settings</h1>
-              <p className="text-gray-600">Manage your account preferences and system configurations</p>
-            </div>
+    return (
+      <div className="space-y-4 h-full overflow-hidden flex flex-col">
+        {/* Simple Search */}
+        <div className="flex gap-4 flex-shrink-0">
+          <input
+            type="text"
+            placeholder="Search users..."
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <select className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+            <option value="">All Departments</option>
+            <option value="hr">HR</option>
+            <option value="engineering">Engineering</option>
+            <option value="sales">Sales</option>
+            <option value="finance">Finance</option>
+            <option value="marketing">Marketing</option>
+          </select>
+        </div>
 
-            <div className="bg-white rounded-lg shadow">
-              <div className="grid grid-cols-1 lg:grid-cols-3 h-[calc(100vh-300px)]">
-                {/* Sidebar - Fixed height, no scroll */}
-                <div className="lg:col-span-1 border-r border-gray-200">
-                  <nav className="p-3">
-                    <ul className="space-y-1">
-                      {settingsSections.map((section) => (
-                        <li key={section.id}>
-                          <button
-                            onClick={() => setActiveSection(section.id)}
-                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                              activeSection === section.id
-                                ? 'bg-orange-100 text-orange-700 border border-orange-200'
-                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                            }`}
-                          >
-                            <div className="flex items-center space-x-2">
-                              <section.icon className="h-4 w-4" />
-                              <div>
-                                <div className="font-medium text-sm">{section.title}</div>
-                                <div className="text-xs text-gray-500">
-                                  {section.description}
-                                </div>
-                              </div>
-                            </div>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </nav>
+        {/* Users Table - Fixed height with scroll */}
+        <div className="bg-white rounded-lg border border-gray-200 flex-1 overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-auto">
+            <table className="min-w-full">
+              <thead className="bg-gray-50 sticky top-0">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">User</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Department</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Role</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Last Login</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {users.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                          user.status === 'Active' ? 'bg-green-100 text-green-600' :
+                          user.status === 'Blocked' ? 'bg-red-100 text-red-600' :
+                          user.status === 'Inactive' ? 'bg-gray-100 text-gray-600' :
+                          'bg-yellow-100 text-yellow-600'
+                        }`}>
+                          {user.avatar}
+                        </div>
+                        <div className="ml-3">
+                          <div className="font-medium text-gray-900">{user.name}</div>
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{user.department}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{user.role}</td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        user.status === 'Active' ? 'bg-green-100 text-green-800' :
+                        user.status === 'Blocked' ? 'bg-red-100 text-red-800' :
+                        user.status === 'Inactive' ? 'bg-gray-100 text-gray-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{user.lastLogin}</td>
+                    <td className="px-4 py-3">
+                      <button 
+                        onClick={() => handleUserClick(user)}
+                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Action
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* User Access Modal */}
+        {showUserModal && selectedUser && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900">User Access Management</h2>
+                <button 
+                  onClick={() => setShowUserModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* User Info */}
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <div className="flex items-center">
+                  <div className={`h-16 w-16 rounded-full flex items-center justify-center text-lg font-medium ${
+                    selectedUser.status === 'Active' ? 'bg-green-100 text-green-600' :
+                    selectedUser.status === 'Blocked' ? 'bg-red-100 text-red-600' :
+                    selectedUser.status === 'Inactive' ? 'bg-gray-100 text-gray-600' :
+                    'bg-yellow-100 text-yellow-600'
+                  }`}>
+                    {selectedUser.avatar}
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-semibold text-gray-900">{selectedUser.name}</h3>
+                    <p className="text-gray-600">{selectedUser.email}</p>
+                    <div className="flex items-center space-x-4 mt-2 text-sm">
+                      <span className="text-gray-600">{selectedUser.department}</span>
+                      <span className="text-gray-600">•</span>
+                      <span className="text-gray-600">{selectedUser.role}</span>
+                      <span className="text-gray-600">•</span>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        selectedUser.status === 'Active' ? 'bg-green-100 text-green-800' :
+                        selectedUser.status === 'Blocked' ? 'bg-red-100 text-red-800' :
+                        selectedUser.status === 'Inactive' ? 'bg-gray-100 text-gray-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {selectedUser.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Access Management Form */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                      <option value="">Select Role</option>
+                      <option value="user">Standard User</option>
+                      <option value="hr">HR Manager</option>
+                      <option value="admin">Administrator</option>
+                      <option value="super-admin">Super Administrator</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Initial Password</label>
+                    <input
+                      type="password"
+                      placeholder="Set password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    />
+                  </div>
                 </div>
 
-                {/* Content - Scrollable when content is long */}
-                <div className="lg:col-span-2 p-4 flex flex-col h-full">
-                  <div className="mb-4 flex-shrink-0">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-1">
-                      {settingsSections.find(s => s.id === activeSection)?.title}
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      {settingsSections.find(s => s.id === activeSection)?.description}
-                    </p>
-                  </div>
+                <div className="flex items-center space-x-4">
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-2 rounded border-gray-300 text-orange-600 focus:ring-orange-500" defaultChecked />
+                    <span className="text-sm text-gray-700">Force password change on first login</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input type="checkbox" className="mr-2 rounded border-gray-300 text-orange-600 focus:ring-orange-500" defaultChecked />
+                    <span className="text-sm text-gray-700">Send welcome email</span>
+                  </label>
+                </div>
 
-                  <div className="flex-1 overflow-y-auto pr-2 min-h-0">
-                    <div className="space-y-4">
-                      {renderContent()}
-                    </div>
-                  </div>
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button 
+                    onClick={() => setShowUserModal(false)}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600">
+                    Grant Access
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
-                  <div className="mt-6 pt-4 border-t border-gray-200 flex-shrink-0">
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={handleSave}
-                        className="flex items-center space-x-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
-                      >
-                        <Save className="h-4 w-4" />
-                        <span>Save Changes</span>
-                      </button>
-                      
-                      {saved && (
-                        <div className="flex items-center space-x-2 text-green-600">
-                          <CheckCircle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Settings saved successfully!</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'user-access':
+        return renderUserAccessSettings();
+      case 'personal':
+        return renderPersonalSettings();
+      case 'notifications':
+        return renderNotificationSettings();
+      case 'security':
+        return renderSecuritySettings();
+      case 'system':
+        return renderSystemSettings();
+      case 'integrations':
+        return renderIntegrationSettings();
+      default:
+        return renderUserAccessSettings();
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Sidebar />
+      <div className="ml-64 min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 p-6 overflow-hidden mt-16 pl-0">
+          <div className="w-full h-full flex flex-col">
+            {/* Header */}
+            <div className="mb-6 flex-shrink-0">
+              <h1 className="text-3xl font-bold text-slate-900">Settings</h1>
+              <p className="text-slate-600 mt-1">Manage your application settings</p>
+            </div>
+
+            {/* Main Content Area */}
+            <div className="flex-1 flex overflow-hidden">
+              {/* Sidebar Navigation */}
+              <nav className="w-64 bg-white rounded-lg border border-gray-200 p-2 flex-shrink-0 overflow-y-auto">
+                {settingsSections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={() => setActiveSection(section.id)}
+                    className={`w-full text-left px-2 py-2 rounded-md mb-2 transition-colors ${
+                      activeSection === section.id
+                        ? 'bg-orange-100 text-orange-700 border border-orange-200'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-medium">{section.title}</div>
+                    <div className="text-sm text-gray-500">{section.description}</div>
+                  </button>
+                ))}
+              </nav>
+
+              {/* Content Area */}
+              <div className="flex-1 ml-4 overflow-hidden">
+                <div className="bg-white rounded-lg border border-gray-200 p-2 h-full overflow-hidden">
+                  {renderContent()}
                 </div>
               </div>
             </div>
@@ -500,5 +659,5 @@ export default function SettingsPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }

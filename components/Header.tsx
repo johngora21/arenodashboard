@@ -50,8 +50,8 @@ export default function Header() {
   }, [])
 
   return (
-    <header className="bg-white border-b border-slate-200 px-6 py-4">
-      <div className="flex items-center justify-between">
+    <header className="bg-white border-b border-slate-200 px-6 py-4 h-16 flex-shrink-0 fixed top-0 left-64 right-0 z-20">
+      <div className="flex items-center justify-between h-full">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold text-slate-900">Human Resource Management</h1>
         </div>

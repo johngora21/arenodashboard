@@ -251,11 +251,11 @@ export default function SalesPage() {
   const conversionRate = ((leads.filter(lead => lead.status === 'closed').length / totalLeads) * 100).toFixed(1)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200">
       <Sidebar />
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className="ml-64 min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100">
+        <main className="flex-1 p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100 mt-16">
           {/* Header */}
           <div className="mb-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

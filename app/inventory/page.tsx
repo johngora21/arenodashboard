@@ -437,12 +437,12 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <Sidebar />
-      <div className="flex-1 lg:ml-0">
+      <div className="ml-64 min-h-screen flex flex-col">
         <Header />
         
-        <main className="p-6">
+        <main className="flex-1 p-8 mt-16">
           <div className="max-w-7xl mx-auto">
             {/* Page Header */}
             <div className="mb-8">

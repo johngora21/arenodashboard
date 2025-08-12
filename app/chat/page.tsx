@@ -236,14 +236,13 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="h-screen bg-slate-50">
       <Sidebar />
-      <div className="flex-1 flex flex-col">
+      <div className="ml-64 h-screen flex flex-col">
         <Header />
-        
-        <div className="flex-1 flex">
+        <div className="flex-1 flex mt-16 pl-6 pr-6">
           {/* Chat Groups Sidebar */}
-          <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
+          <div className="w-80 bg-white border-r border-slate-200 flex flex-col rounded-lg shadow-sm">
             {/* Header with Create Group and New Chat buttons */}
             <div className="p-4 border-b border-slate-200">
               <div className="flex space-x-2 mb-3">

@@ -21,12 +21,15 @@ import {
   FileText,
   ArrowRight,
   History,
-  Settings
+  Settings,
+  ArrowLeft
 } from 'lucide-react'
 import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
+import { useRouter } from 'next/navigation'
 
 export default function SalesReportsPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('pending')
   const [searchTerm, setSearchTerm] = useState('')
 
@@ -171,23 +174,32 @@ export default function SalesReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200">
       <Sidebar />
-      <div className="flex-1 flex flex-col lg:ml-0">
+      <div className="ml-64 min-h-screen flex flex-col">
         <Header />
-        <main className="flex-1 p-4 sm:p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100">
+        <main className="flex-1 p-8 bg-gradient-to-br from-white via-slate-50 to-slate-100 mt-16">
           {/* Header */}
           <div className="mb-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Sales Reports</h1>
-                <p className="text-slate-600 mt-1 text-base">Review and manage sales-related approval requests</p>
-              </div>
-              <div className="flex gap-2">
-                <Button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600">
-                  <Plus className="h-4 w-4" />
-                  New Request
+            <div className="flex flex-col gap-4">
+              {/* Back Button */}
+              <div className="flex justify-start">
+                <Button variant="ghost" onClick={() => router.push('/sales')} className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Sales
                 </Button>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Sales Reports</h1>
+                  <p className="text-slate-600 mt-1 text-base">Review and manage sales-related approval requests</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600">
+                    <Plus className="h-4 w-4" />
+                    New Request
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

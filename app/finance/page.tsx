@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import Sidebar from "@/components/Sidebar";
+import Header from "@/components/Header";
 import {
   TrendingUp,
   TrendingDown,
@@ -180,10 +181,11 @@ export default function FinancePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200">
       <Sidebar />
-      <main className="flex-1 flex flex-col lg:ml-0">
-        <div className="p-4 sm:p-8">
+      <div className="ml-64 min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 p-8 mt-16">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -1567,8 +1569,8 @@ export default function FinancePage() {
               </div>
             </TabsContent>
           </Tabs>
-        </div>
-      </main>
+        </main>
+      </div>
 
       {/* Transaction Modal */}
       <Dialog open={showTransactionModal} onOpenChange={setShowTransactionModal}>

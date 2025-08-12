@@ -1,39 +1,27 @@
 "use client"
 
-import { useState, useEffect } from "react"
+
 import { 
   LayoutDashboard, 
   FileText, 
   Users, 
   Settings, 
   LogOut, 
-  Menu, 
-  X,
   TrendingUp,
-  Package,
-  Truck,
-  Bell,
-  User,
-  UserCheck,
-  CheckSquare,
-  Ticket,
-  Calendar,
   Database,
-  Ship,
   UserPlus,
   DollarSign,
   Briefcase,
   BarChart3,
   Building2,
-  Car,
-  MessageSquare,
-  Shield
+  CheckSquare,
+  Calendar
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import Image from 'next/image'
 import { useAuth } from './AuthProvider'
-import { getUserFeatures, SIDEBAR_FEATURES } from '@/lib/firebase-service'
+
 
 const navigation = [
   { id: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },

@@ -28,13 +28,62 @@ import {
   Activity
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { 
-  getAllReports,
-  approveReport,
-  rejectReport,
-  deleteReport,
-  Report
-} from "@/lib/firebase-service"
+// Mock data types - replace with MySQL types later
+interface Report {
+  id: string
+  title: string
+  description: string
+  department: string
+  reportType: string
+  status: string
+  submittedBy: string
+  submittedAt: Date
+  approvedBy?: string
+  approvedAt?: Date
+  rejectedBy?: string
+  rejectedAt?: Date
+  comments?: string
+}
+
+// Mock functions
+const getAllReports = async (): Promise<Report[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([
+          {
+        id: '1',
+        title: 'Monthly Financial Report',
+        description: 'Financial summary for Q1 2024',
+        department: 'Finance',
+        reportType: 'Monthly Summary',
+        status: 'pending',
+        submittedBy: 'john@example.com',
+        submittedAt: new Date()
+      },
+      {
+        id: '2',
+        title: 'Budget Review',
+        description: 'Annual budget review and planning',
+        department: 'Finance',
+        reportType: 'Annual Review',
+        status: 'approved',
+        submittedBy: 'jane@example.com',
+        submittedAt: new Date(),
+        approvedBy: 'admin@example.com',
+        approvedAt: new Date()
+      }
+  ]), 500))
+}
+
+const approveReport = async (reportId: string, approver: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
+
+const rejectReport = async (reportId: string, rejector: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
+
+const deleteReport = async (reportId: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
 
 export default function FinanceReportsPage() {
   const { user, loading: authLoading } = useAuth()

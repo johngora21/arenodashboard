@@ -28,7 +28,28 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react"
-import { ReportService, ReportFilters } from "@/lib/report-service"
+// Mock data types - replace with MySQL types later
+interface ReportFilters {
+  period: string
+  category: string
+}
+
+// Mock ReportService
+const ReportService = {
+  generateFinancialPerformanceReport: async (filters: ReportFilters) => {
+    return new Promise(resolve => setTimeout(() => resolve({
+      title: 'Financial Performance Report',
+      description: 'Revenue, expenses, and profitability analysis',
+      filters,
+      data: {
+        revenue: 2500000,
+        expenses: 1800000,
+        profit: 700000,
+        growth: 12.5
+      }
+    }), 1000))
+  }
+}
 
 export default function FinancialPerformanceReportPage() {
   const { user, loading } = useAuth()

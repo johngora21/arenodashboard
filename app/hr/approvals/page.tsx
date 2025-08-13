@@ -29,23 +29,53 @@ import {
   Briefcase,
   BarChart3
 } from "lucide-react"
-import { 
-  getPendingApprovalsByDepartment,
-  approveRequest,
-  rejectRequest,
-  getAllEmployees,
-  getTeamMemberDetails,
-  getTeamMemberWorkload,
-  getTeamMemberPerformance,
-  getTeamMemberAvailability,
-  getApprovalsByDepartment,
-  getApprovalHistoryByDepartmentAndStatus
-} from "@/lib/firebase-service"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { collection, getDocs, getDoc, doc } from "firebase/firestore"
-import { db } from "@/lib/firebase-config"
+
+// Mock functions to replace Firebase calls
+const getPendingApprovalsByDepartment = async (department: string): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
+
+const approveRequest = async (approvalId: string, approver: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
+
+const rejectRequest = async (approvalId: string, approver: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
+
+const getAllEmployees = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([
+    { id: '1', name: 'John Doe', position: 'Manager', department: 'HR', email: 'john@example.com', phone: '+1234567890' },
+    { id: '2', name: 'Jane Smith', position: 'Staff', department: 'HR', email: 'jane@example.com', phone: '+1234567891' }
+  ]), 500))
+}
+
+const getTeamMemberDetails = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
+
+const getTeamMemberWorkload = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
+
+const getTeamMemberPerformance = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
+
+const getTeamMemberAvailability = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
+
+const getApprovalsByDepartment = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
+
+const getApprovalHistoryByDepartmentAndStatus = async (): Promise<any[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([]), 300))
+}
 
 interface ApprovalRequest {
   id: string
@@ -135,14 +165,10 @@ export default function ApprovalsPage() {
   const getPendingApprovalCount = async () => {
     try {
       console.log('Getting pending approval count...')
-      const approvalRef = collection(db, 'approvalRequests')
-      const snapshot = await getDocs(approvalRef)
-      const pendingApprovals = snapshot.docs.filter(doc => {
-        const data = doc.data()
-        return data.department === 'hr' && data.status === 'pending'
-      })
-      console.log('Pending HR approvals count:', pendingApprovals.length)
-      setPendingCount(pendingApprovals.length)
+      // Mock implementation - replace with MySQL integration later
+      const mockPendingCount = 5
+      console.log('Pending HR approvals count:', mockPendingCount)
+      setPendingCount(mockPendingCount)
     } catch (error) {
       console.error('Error getting pending approval count:', error)
     }
@@ -310,29 +336,23 @@ export default function ApprovalsPage() {
       return teamMemberNames[memberId].name
     }
     
-    // If not found or is the same as ID, try to fetch from Firestore
-    if (memberId && typeof window !== 'undefined') {
-      // Only run in browser
-      import('@/lib/firebase-service').then(mod => {
-        mod.getEmployeeById(memberId).then(employee => {
-          if (employee) {
-            // Update the cache with the fetched employee
-            setTeamMemberNames(prev => ({
-              ...prev,
-              [memberId]: {
-                id: employee.id,
-                name: employee.name,
-                position: employee.position,
-                department: employee.department,
-                email: employee.email,
-                phone: employee.phone
-              }
-            }))
-          }
-        }).catch(error => {
-          console.error('Error fetching employee:', error)
-        })
-      })
+    // Mock employee data - replace with MySQL integration later
+    if (memberId) {
+      const mockEmployee = {
+        id: memberId,
+        name: `Employee ${memberId}`,
+        position: 'Staff Member',
+        department: 'HR',
+        email: `emp${memberId}@example.com`,
+        phone: '+1234567890'
+      }
+      
+      setTeamMemberNames(prev => ({
+        ...prev,
+        [memberId]: mockEmployee
+      }))
+      
+      return mockEmployee.name
     }
     
     return 'Fetching...'
@@ -350,9 +370,9 @@ export default function ApprovalsPage() {
       // Get pending count first
       await getPendingApprovalCount()
       
-      // Load actual approval requests from Firebase
+      // Load approval requests from mock data
       const hrApprovals = await getPendingApprovalsByDepartment('hr')
-      console.log('Raw HR approvals from Firebase:', hrApprovals)
+      console.log('Raw HR approvals from mock data:', hrApprovals)
       console.log('Number of HR approvals found:', hrApprovals.length)
       
       // Wait for employees to be loaded before processing team member names
@@ -434,7 +454,7 @@ export default function ApprovalsPage() {
   const handleReject = async (approvalId: string) => {
     try {
       console.log('Rejecting request:', approvalId)
-      await rejectRequest(approvalId, user?.email || 'Unknown', 'Rejected by HR')
+      await rejectRequest(approvalId, user?.email || 'Unknown')
       console.log('Request rejected successfully')
       alert('Request rejected successfully!')
     } catch (error) {
@@ -460,10 +480,10 @@ export default function ApprovalsPage() {
 
       // Analyze driver
       if (approval.data?.teamData?.assignedDriver) {
-        const driverDetails = await getTeamMemberDetails(approval.data.teamData.assignedDriver)
-        const driverWorkload = await getTeamMemberWorkload(approval.data.teamData.assignedDriver, currentMonth)
-        const driverPerformance = await getTeamMemberPerformance(approval.data.teamData.assignedDriver)
-        const driverAvailability = await getTeamMemberAvailability(approval.data.teamData.assignedDriver)
+        const driverDetails = await getTeamMemberDetails()
+        const driverWorkload = await getTeamMemberWorkload()
+        const driverPerformance = await getTeamMemberPerformance()
+        const driverAvailability = await getTeamMemberAvailability()
         
         analysis.teamMembers.driver = {
           ...driverDetails,
@@ -475,10 +495,10 @@ export default function ApprovalsPage() {
 
       // Analyze supervisor
       if (approval.data?.teamData?.assignedSupervisor) {
-        const supervisorDetails = await getTeamMemberDetails(approval.data.teamData.assignedSupervisor)
-        const supervisorWorkload = await getTeamMemberWorkload(approval.data.teamData.assignedSupervisor, currentMonth)
-        const supervisorPerformance = await getTeamMemberPerformance(approval.data.teamData.assignedSupervisor)
-        const supervisorAvailability = await getTeamMemberAvailability(approval.data.teamData.assignedSupervisor)
+        const supervisorDetails = await getTeamMemberDetails()
+        const supervisorWorkload = await getTeamMemberWorkload()
+        const supervisorPerformance = await getTeamMemberPerformance()
+        const supervisorAvailability = await getTeamMemberAvailability()
         
         analysis.teamMembers.supervisor = {
           ...supervisorDetails,
@@ -493,10 +513,10 @@ export default function ApprovalsPage() {
         analysis.teamMembers.workers = []
         
         for (const worker of approval.data.teamData.workerDetails) {
-          const workerDetails = await getTeamMemberDetails(worker.id)
-          const workerWorkload = await getTeamMemberWorkload(worker.id, currentMonth)
-          const workerPerformance = await getTeamMemberPerformance(worker.id)
-          const workerAvailability = await getTeamMemberAvailability(worker.id)
+          const workerDetails = await getTeamMemberDetails()
+          const workerWorkload = await getTeamMemberWorkload()
+          const workerPerformance = await getTeamMemberPerformance()
+          const workerAvailability = await getTeamMemberAvailability()
           
           analysis.teamMembers.workers.push({
             ...workerDetails,

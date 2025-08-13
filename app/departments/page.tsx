@@ -34,19 +34,39 @@ import {
   Phone,
   Mail
 } from "lucide-react"
-import { 
-  getAllDepartments, 
-  addDepartment, 
-  updateDepartment, 
-  deleteDepartment, 
-  getDepartmentStats,
-  searchDepartments,
-  seedDepartmentSampleData,
-  getEmployeesByDepartment,
-  Department,
-  DepartmentStats,
-  Employee
-} from "@/lib/firebase-service"
+// Mock data types - replace with MySQL types later
+interface Department {
+  id: string
+  name: string
+  branchId: string
+  branchName: string
+  code: string
+  location: string
+  description: string
+  manager: string
+  budget: number
+  employeeCount: number
+  status: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface DepartmentStats {
+  totalDepartments: number
+  activeDepartments: number
+  totalEmployees: number
+  averageBudget: number
+  departmentsByStatus: { [key: string]: number }
+}
+
+interface Employee {
+  id: string
+  name: string
+  email: string
+  position: string
+  department: string
+  status: string
+}
 
 interface NewDepartmentForm {
   name: string
@@ -64,6 +84,195 @@ interface NewDepartmentForm {
 export default function DepartmentsPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+
+  // Mock data
+  const mockDepartments: Department[] = [
+    {
+      id: '1',
+      name: 'Engineering',
+      branchId: '1',
+      branchName: 'Dar es Salaam Main Branch',
+      code: 'ENG',
+      location: 'Floor 3, Building A',
+      description: 'Software development and technical operations',
+      manager: 'John Doe',
+      budget: 500000,
+      employeeCount: 25,
+      status: 'active',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01')
+    },
+    {
+      id: '2',
+      name: 'Sales',
+      branchId: '1',
+      branchName: 'Dar es Salaam Main Branch',
+      code: 'SALES',
+      location: 'Floor 2, Building A',
+      description: 'Sales and customer relations',
+      manager: 'Jane Smith',
+      budget: 300000,
+      employeeCount: 15,
+      status: 'active',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01')
+    },
+    {
+      id: '3',
+      name: 'HR',
+      branchId: '1',
+      branchName: 'Dar es Salaam Main Branch',
+      code: 'HR',
+      location: 'Floor 1, Building A',
+      description: 'Human resources and employee management',
+      manager: 'Mike Johnson',
+      budget: 200000,
+      employeeCount: 8,
+      status: 'active',
+      createdAt: new Date('2024-01-01'),
+      updatedAt: new Date('2024-01-01')
+    }
+  ]
+
+  // Mock functions
+  const getAllDepartments = async (): Promise<Department[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(mockDepartments), 500))
+  }
+
+  const getDepartmentStats = async (): Promise<DepartmentStats> => {
+    return new Promise(resolve => setTimeout(() => resolve({
+      totalDepartments: mockDepartments.length,
+      activeDepartments: mockDepartments.filter(d => d.status === 'active').length,
+      totalEmployees: mockDepartments.reduce((sum, d) => sum + d.employeeCount, 0),
+      averageBudget: mockDepartments.reduce((sum, d) => sum + d.budget, 0) / mockDepartments.length,
+      departmentsByStatus: mockDepartments.reduce((acc, d) => {
+        acc[d.status] = (acc[d.status] || 0) + 1
+        return acc
+      }, {} as { [key: string]: number })
+    }), 500))
+  }
+
+  const addDepartment = async (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newDept: Department = {
+          ...department,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+        mockDepartments.push(newDept)
+        resolve(newDept.id)
+      }, 500)
+    })
+  }
+
+  const updateDepartment = async (id: string, updates: Partial<Department>): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const index = mockDepartments.findIndex(d => d.id === id)
+        if (index !== -1) {
+          mockDepartments[index] = { ...mockDepartments[index], ...updates, updatedAt: new Date() }
+        }
+        resolve()
+      }, 500)
+    })
+  }
+
+  const deleteDepartment = async (id: string): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const index = mockDepartments.findIndex(d => d.id === id)
+        if (index !== -1) {
+          mockDepartments.splice(index, 1)
+        }
+        resolve()
+      }, 500)
+    })
+  }
+
+  const searchDepartments = async (query: string): Promise<Department[]> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const filtered = mockDepartments.filter(d => 
+          d.name.toLowerCase().includes(query.toLowerCase()) ||
+          d.code.toLowerCase().includes(query.toLowerCase()) ||
+          d.manager.toLowerCase().includes(query.toLowerCase())
+        )
+        resolve(filtered)
+      }, 300)
+    })
+  }
+
+  const getEmployeesByDepartment = async (departmentId: string): Promise<Employee[]> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const dept = mockDepartments.find(d => d.id === departmentId)
+        if (dept) {
+          const mockEmployees: Employee[] = Array.from({ length: dept.employeeCount }, (_, i) => ({
+            id: `${departmentId}-emp-${i + 1}`,
+            name: `Employee ${i + 1}`,
+            email: `emp${i + 1}@${dept.name.toLowerCase()}.com`,
+            position: 'Staff Member',
+            department: dept.name,
+            status: 'active'
+          }))
+          resolve(mockEmployees)
+        } else {
+          resolve([])
+        }
+      }, 300)
+    })
+  }
+
+  const seedDepartmentSampleData = async (): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        // Add sample departments if they don't exist
+        const sampleDepartments = [
+          {
+            id: '4',
+            name: 'Marketing',
+            branchId: '1',
+            branchName: 'Dar es Salaam Main Branch',
+            code: 'MKT',
+            location: 'Floor 2, Building B',
+            description: 'Marketing and communications',
+            manager: 'Sarah Wilson',
+            budget: 400000,
+            employeeCount: 12,
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          },
+          {
+            id: '5',
+            name: 'Finance',
+            branchId: '1',
+            branchName: 'Dar es Salaam Main Branch',
+            code: 'FIN',
+            location: 'Floor 1, Building B',
+            description: 'Financial management and accounting',
+            manager: 'Tom Anderson',
+            budget: 600000,
+            employeeCount: 18,
+            status: 'active',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        ]
+        
+        sampleDepartments.forEach(dept => {
+          if (!mockDepartments.find(d => d.id === dept.id)) {
+            mockDepartments.push(dept)
+          }
+        })
+        
+        resolve()
+      }, 500)
+    })
+  }
+
   const [departments, setDepartments] = useState<Department[]>([])
   const [stats, setStats] = useState<DepartmentStats | null>(null)
   const [dataLoading, setDataLoading] = useState(true)
@@ -121,7 +330,7 @@ export default function DepartmentsPage() {
     try {
       setDataLoading(true)
       
-      // Load departments and stats from Firebase
+      // Load departments and stats from mock data
       const [departmentsData, statsData] = await Promise.all([
         getAllDepartments(),
         getDepartmentStats()
@@ -177,6 +386,8 @@ export default function DepartmentsPage() {
       // Reset form and close modal
       setFormData({
         name: '',
+        branchId: '',
+        branchName: '',
         code: '',
         description: '',
         manager: '',
@@ -261,12 +472,9 @@ export default function DepartmentsPage() {
     return new Intl.NumberFormat('en-US').format(num)
   }
 
-  // Helper to format Firebase Timestamp
+  // Helper to format timestamps
   const formatTimestamp = (timestamp: any) => {
     if (!timestamp) return '-'
-    if (timestamp.toDate) {
-      return timestamp.toDate().toLocaleDateString()
-    }
     if (timestamp instanceof Date) {
       return timestamp.toLocaleDateString()
     }
@@ -352,10 +560,10 @@ export default function DepartmentsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-slate-600">Total Departments</p>
-                      <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+                      <p className="text-2xl font-bold text-slate-900">{stats.totalDepartments}</p>
                       <div className="flex items-center mt-2">
                         <ArrowUpRight className="h-4 w-4 text-green-500 mr-1" />
-                        <span className="text-sm text-green-600">{stats.active} active</span>
+                        <span className="text-sm text-green-600">{stats.activeDepartments} active</span>
                       </div>
                     </div>
                     <div className="bg-blue-100 p-3 rounded-lg">
@@ -371,7 +579,7 @@ export default function DepartmentsPage() {
                       <p className="text-2xl font-bold text-green-600">{formatNumber(stats.totalEmployees)}</p>
                       <div className="flex items-center mt-2">
                         <Activity className="h-4 w-4 text-green-500 mr-1" />
-                        <span className="text-sm text-green-600">Avg: {stats.averageEmployees}/dept</span>
+                        <span className="text-sm text-green-600">Avg: {Math.round(stats.totalEmployees / stats.totalDepartments)}/dept</span>
                       </div>
                     </div>
                     <div className="bg-green-100 p-3 rounded-lg">
@@ -384,7 +592,7 @@ export default function DepartmentsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-slate-600">Total Budget</p>
-                      <p className="text-2xl font-bold text-blue-600">{formatCurrency(stats.totalBudget)}</p>
+                      <p className="text-2xl font-bold text-blue-600">{formatCurrency(stats.averageBudget * stats.totalDepartments)}</p>
                       <div className="flex items-center mt-2">
                         <DollarSign className="h-4 w-4 text-blue-500 mr-1" />
                         <span className="text-sm text-blue-600">Annual allocation</span>
@@ -400,7 +608,7 @@ export default function DepartmentsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-slate-600">Restructuring</p>
-                      <p className="text-2xl font-bold text-yellow-600">{stats.restructuring}</p>
+                      <p className="text-2xl font-bold text-yellow-600">{stats.departmentsByStatus.restructuring || 0}</p>
                       <div className="flex items-center mt-2">
                         <Clock className="h-4 w-4 text-yellow-500 mr-1" />
                         <span className="text-sm text-yellow-600">In transition</span>
@@ -729,7 +937,7 @@ export default function DepartmentsPage() {
                 {formData.branchName && (
                   <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 text-blue-600" />
+                      <Building className="h-4 w-4 text-blue-600" />
                       <span className="text-sm font-medium text-blue-800">
                         Selected Branch: {formData.branchName}
                       </span>

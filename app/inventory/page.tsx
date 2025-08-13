@@ -32,24 +32,38 @@ import {
   X,
   XCircle
 } from "lucide-react"
-import { 
-  getAllInventoryItems, 
-  addInventoryItem, 
-  updateInventoryItem, 
-  deleteInventoryItem, 
-  getInventoryStats,
-  searchInventoryItems,
-  InventoryItem,
-  InventoryStats,
-  getAllInventoryCategories,
-  addInventoryCategory,
-  InventoryCategory,
-  getPendingApprovalsByDepartment,
-  approveRequest,
-  rejectRequest
-} from "@/lib/firebase-service"
-import { collection, getDocs, deleteDoc, addDoc, doc } from 'firebase/firestore'
-import { db } from '@/lib/firebase-config'
+// Mock data types - replace with MySQL types later
+interface InventoryItem {
+  id: string
+  name: string
+  sku: string
+  category: string
+  description: string
+  supplier: string
+  unit: string
+  quantity: number
+  minQuantity: number
+  maxQuantity: number
+  unitPrice: number
+  location: string
+  status: string
+  lastUpdated: Date
+}
+
+interface InventoryStats {
+  totalItems: number
+  totalValue: number
+  lowStockItems: number
+  outOfStockItems: number
+  categories: number
+}
+
+interface InventoryCategory {
+  id: string
+  name: string
+  description: string
+  itemCount: number
+}
 import { Badge } from "@/components/ui/badge"
 
 interface NewInventoryForm {
@@ -69,6 +83,136 @@ interface NewInventoryForm {
 export default function InventoryPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+
+  // Mock data
+  const mockInventoryItems: InventoryItem[] = [
+    {
+      id: '1',
+      name: 'Laptop Dell XPS 13',
+      sku: 'LAP-001',
+      category: 'Electronics',
+      description: 'High-performance laptop for development',
+      supplier: 'Dell Technologies',
+      unit: 'piece',
+      quantity: 15,
+      minQuantity: 5,
+      maxQuantity: 50,
+      unitPrice: 1200,
+      location: 'Warehouse A, Shelf 1',
+      status: 'active',
+      lastUpdated: new Date()
+    },
+    {
+      id: '2',
+      name: 'Office Chair',
+      sku: 'FUR-001',
+      category: 'Furniture',
+      description: 'Ergonomic office chair',
+      supplier: 'Office Supplies Co',
+      unit: 'piece',
+      quantity: 8,
+      minQuantity: 3,
+      maxQuantity: 20,
+      unitPrice: 250,
+      location: 'Warehouse B, Shelf 2',
+      status: 'active',
+      lastUpdated: new Date()
+    }
+  ]
+
+  const mockCategories: InventoryCategory[] = [
+    { id: '1', name: 'Electronics', description: 'Computers and electronic devices', itemCount: 15 },
+    { id: '2', name: 'Furniture', description: 'Office furniture and equipment', itemCount: 8 },
+    { id: '3', name: 'Office Supplies', description: 'General office supplies', itemCount: 25 }
+  ]
+
+  // Mock functions
+  const getAllInventoryItems = async (): Promise<InventoryItem[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(mockInventoryItems), 500))
+  }
+
+  const getInventoryStats = async (): Promise<InventoryStats> => {
+    return new Promise(resolve => setTimeout(() => resolve({
+      totalItems: mockInventoryItems.length,
+      totalValue: mockInventoryItems.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0),
+      lowStockItems: mockInventoryItems.filter(item => item.quantity <= item.minQuantity).length,
+      outOfStockItems: mockInventoryItems.filter(item => item.quantity === 0).length,
+      categories: mockCategories.length
+    }), 500))
+  }
+
+  const getAllInventoryCategories = async (): Promise<InventoryCategory[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(mockCategories), 300))
+  }
+
+  const addInventoryItem = async (item: Omit<InventoryItem, 'id' | 'lastUpdated'>): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newItem: InventoryItem = { ...item, id: Date.now().toString(), lastUpdated: new Date() }
+        mockInventoryItems.push(newItem)
+        resolve()
+      }, 500)
+    })
+  }
+
+  const updateInventoryItem = async (id: string, updates: Partial<InventoryItem>): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const index = mockInventoryItems.findIndex(item => item.id === id)
+        if (index !== -1) {
+          mockInventoryItems[index] = { ...mockInventoryItems[index], ...updates, lastUpdated: new Date() }
+        }
+        resolve()
+      }, 500)
+    })
+  }
+
+  const deleteInventoryItem = async (id: string): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const index = mockInventoryItems.findIndex(item => item.id === id)
+        if (index !== -1) {
+          mockInventoryItems.splice(index, 1)
+        }
+        resolve()
+      }, 500)
+    })
+  }
+
+  const searchInventoryItems = async (query: string): Promise<InventoryItem[]> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const filtered = mockInventoryItems.filter(item => 
+          item.name.toLowerCase().includes(query.toLowerCase()) ||
+          item.sku.toLowerCase().includes(query.toLowerCase()) ||
+          item.category.toLowerCase().includes(query.toLowerCase())
+        )
+        resolve(filtered)
+      }, 300)
+    })
+  }
+
+  const addInventoryCategory = async (category: Omit<InventoryCategory, 'id' | 'itemCount'>): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newCategory: InventoryCategory = { ...category, id: Date.now().toString(), itemCount: 0 }
+        mockCategories.push(newCategory)
+        resolve()
+      }, 500)
+    })
+  }
+
+  const getPendingApprovalsByDepartment = async (department: string): Promise<any[]> => {
+    return new Promise(resolve => setTimeout(() => resolve([]), 300))
+  }
+
+  const approveRequest = async (approvalId: string, approver: string): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, 300))
+  }
+
+  const rejectRequest = async (approvalId: string, approver: string): Promise<void> => {
+    return new Promise(resolve => setTimeout(resolve, 300))
+  }
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([])
   const [stats, setStats] = useState<InventoryStats | null>(null)
   const [categories, setCategories] = useState<InventoryCategory[]>([])

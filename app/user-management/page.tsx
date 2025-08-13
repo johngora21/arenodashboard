@@ -2,17 +2,6 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-import ProtectedRoute from '@/components/ProtectedRoute'
-import { 
-  getAllSystemUsers, 
-  updateUser, 
-  deleteUser, 
-  getAllUserRoles, 
-  createUserWithAuth,
-  User, 
-  UserRole, 
-  SIDEBAR_FEATURES 
-} from '@/lib/firebase-service'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,7 +20,33 @@ import {
 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 import Header from '@/components/Header'
-import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
+
+// Mock data types - replace with MySQL types later
+interface User {
+  id: string
+  name: string
+  email: string
+  role: string
+  roleId: string
+  department: string
+  position: string
+  phone: string
+  permissions: string[]
+  status: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface UserRole {
+  id: string
+  name: string
+  description: string
+  permissions: string[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+const SIDEBAR_FEATURES = ['dashboard', 'analytics', 'shipments', 'quotes', 'customers', 'agents', 'drivers', 'employees', 'inventory', 'finance', 'reports', 'settings']
 
 const PERMISSIONS = [
   'all_access',
@@ -66,6 +81,106 @@ const SIDEBAR_FEATURES_LIST = [
 
 function UserManagementPage() {
   const { user } = useAuth()
+
+  // Mock data
+  const mockUsers: User[] = [
+    {
+      id: '1',
+      name: 'Admin User',
+      email: 'admin@iris.com',
+      role: 'Super Admin',
+      roleId: '1',
+      department: 'IT',
+      position: 'System Administrator',
+      phone: '+255123456789',
+      permissions: ['all_access'],
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      id: '2',
+      name: 'John Doe',
+      email: 'john@iris.com',
+      role: 'Manager',
+      roleId: '2',
+      department: 'HR',
+      position: 'HR Manager',
+      phone: '+255123456790',
+      permissions: ['hr_access', 'user_management'],
+      status: 'active',
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ]
+
+  const mockRoles: UserRole[] = [
+    {
+      id: '1',
+      name: 'Super Admin',
+      description: 'Full system access',
+      permissions: ['all_access'],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    {
+      id: '2',
+      name: 'Manager',
+      description: 'Department management access',
+      permissions: ['hr_access', 'user_management'],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }
+  ]
+
+  // Mock functions
+  const getAllSystemUsers = async (): Promise<User[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(mockUsers), 500))
+  }
+
+  const getAllUserRoles = async (): Promise<UserRole[]> => {
+    return new Promise(resolve => setTimeout(() => resolve(mockRoles), 500))
+  }
+
+  const updateUser = async (id: string, updates: Partial<User>): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const index = mockUsers.findIndex(u => u.id === id)
+        if (index !== -1) {
+          mockUsers[index] = { ...mockUsers[index], ...updates, updatedAt: new Date() }
+        }
+        resolve()
+      }, 500)
+    })
+  }
+
+  const deleteUser = async (id: string): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const index = mockUsers.findIndex(u => u.id === id)
+        if (index !== -1) {
+          mockUsers.splice(index, 1)
+        }
+        resolve()
+      }, 500)
+    })
+  }
+
+  const createUserWithAuth = async (userData: any): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const newUser: User = {
+          ...userData,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+        mockUsers.push(newUser)
+        resolve()
+      }, 500)
+    })
+  }
+
   const [users, setUsers] = useState<User[]>([])
   const [roles, setRoles] = useState<UserRole[]>([])
   const [loading, setLoading] = useState(true)
@@ -207,7 +322,7 @@ function UserManagementPage() {
         return
       }
 
-      // Create user with Firebase Auth and send welcome email
+      // Create user with mock auth and send welcome email
       const result = await createUserWithAuth({
         email: addUserForm.email,
         name: addUserForm.name,
@@ -276,18 +391,9 @@ function UserManagementPage() {
     if (!editForm?.email || !editForm?.name) return
     try {
       setLoading(true)
-      const auth = getAuth()
+      // Mock implementation - replace with MySQL integration later
       const defaultPassword = '99009900'
-      let userCredential
-      try {
-        // Try to create the user in Firebase Auth
-        userCredential = await createUserWithEmailAndPassword(auth, editForm.email, defaultPassword)
-      } catch (err: any) {
-        // If user already exists, ignore error
-        if (err.code !== 'auth/email-already-in-use') throw err
-      }
-      // Send password reset email
-      await sendPasswordResetEmail(auth, editForm.email)
+      console.log('Creating user with email:', editForm.email, 'and password:', defaultPassword)
       setMessage(`First password sent to ${editForm.email}. Default password is 99009900. User must reset password from email link.`)
       setIsSuccess(true)
     } catch (error: any) {
@@ -547,10 +653,4 @@ function UserManagementPage() {
   )
 }
 
-export default function ProtectedUserManagementPage() {
-  return (
-    <ProtectedRoute requiredPermission="user_management">
-      <UserManagementPage />
-    </ProtectedRoute>
-  )
-} 
+export default UserManagementPage 

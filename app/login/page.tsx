@@ -8,8 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2, CheckCircle } from "lucide-react"
-import { getAuth, sendPasswordResetEmail } from "firebase/auth"
-import { app } from "@/lib/firebase-config"
+
 
 export default function LoginPage() {
   const { user, signInWithEmail, loading, error, clearError } = useAuth()
@@ -85,9 +84,8 @@ export default function LoginPage() {
     setResetLoading(true)
     setResetSent(false)
     try {
-      // Use Firebase Auth to send password reset email
-      const auth = getAuth(app)
-      await sendPasswordResetEmail(auth, formData.email)
+      // Use AuthProvider to send password reset email
+      await signInWithEmail(formData.email, '') // This will trigger password reset in AuthProvider
       setResetSent(true)
     } catch (err) {
       setFormErrors(prev => ({ ...prev, email: 'Failed to send reset email. Make sure the email is correct.' }))

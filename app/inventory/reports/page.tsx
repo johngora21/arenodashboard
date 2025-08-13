@@ -28,13 +28,48 @@ import {
   Activity
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { 
-  getAllReports,
-  approveReport,
-  rejectReport,
-  deleteReport,
-  Report
-} from "@/lib/firebase-service"
+// Mock data types - replace with MySQL types later
+interface Report {
+  id: string
+  title: string
+  description: string
+  department: string
+  status: string
+  submittedBy: string
+  submittedAt: Date
+  approvedBy?: string
+  approvedAt?: Date
+  rejectedBy?: string
+  rejectedAt?: Date
+  comments?: string
+}
+
+// Mock functions
+const getAllReports = async (): Promise<Report[]> => {
+  return new Promise(resolve => setTimeout(() => resolve([
+    {
+      id: '1',
+      title: 'Inventory Audit Report',
+      description: 'Monthly inventory audit summary',
+      department: 'Inventory',
+      status: 'pending',
+      submittedBy: 'inventory@example.com',
+      submittedAt: new Date()
+    }
+  ]), 500))
+}
+
+const approveReport = async (reportId: string, approver: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
+
+const rejectReport = async (reportId: string, rejector: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
+
+const deleteReport = async (reportId: string): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, 300))
+}
 
 export default function InventoryReportsPage() {
   const { user, loading: authLoading } = useAuth()

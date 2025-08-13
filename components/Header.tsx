@@ -1,10 +1,9 @@
 "use client"
 
-
-import { User } from "lucide-react"
-
+import { Bell, User, MessageSquare } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { useAuth } from "./AuthProvider"
-
+import Link from "next/link"
 
 export default function Header() {
   const { user } = useAuth()
@@ -19,7 +18,18 @@ export default function Header() {
           <h1 className="text-xl font-semibold text-slate-900">Human Resource Management</h1>
         </div>
 
-
+        <div className="flex items-center space-x-4">
+          <Link href="/chat">
+            <Button variant="ghost" size="icon" className="hover:bg-slate-100">
+              <MessageSquare className="h-5 w-5" />
+            </Button>
+          </Link>
+          
+          <Link href="/notifications">
+            <Button variant="ghost" size="icon">
+              <Bell className="h-5 w-5" />
+            </Button>
+          </Link>
           
           <div className="flex items-center space-x-2">
             <div className="h-8 w-8 bg-orange-500 rounded-full flex items-center justify-center">

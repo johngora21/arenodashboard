@@ -28,13 +28,49 @@ import Header from '@/components/Header'
 import Sidebar from '@/components/Sidebar'
 import { useRouter } from 'next/navigation'
 
+// Type definitions
+interface BaseApproval {
+  id: string
+  type: string
+  title: string
+  description: string
+  requester: string
+  requesterRole: string
+  department: string
+  branch: string
+  totalValue: number
+  priority: string
+  status: string
+  submittedAt: string
+}
+
+interface PendingApproval extends BaseApproval {
+  status: 'pending'
+}
+
+interface ApprovedApproval extends BaseApproval {
+  status: 'approved'
+  approvedAt: string
+  approvedBy: string
+  comments: string
+}
+
+interface RejectedApproval extends BaseApproval {
+  status: 'rejected'
+  rejectedAt: string
+  rejectedBy: string
+  comments: string
+}
+
+type Approval = PendingApproval | ApprovedApproval | RejectedApproval
+
 export default function FinanceApprovalsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('pending')
   const [searchTerm, setSearchTerm] = useState('')
 
   // Mock data
-  const pendingApprovals = [
+  const pendingApprovals: PendingApproval[] = [
     {
       id: '1',
       type: 'purchase',
@@ -65,7 +101,7 @@ export default function FinanceApprovalsPage() {
     }
   ]
 
-  const approvedApprovals = [
+  const approvedApprovals: ApprovedApproval[] = [
     {
       id: '3',
       type: 'purchase',
@@ -85,7 +121,7 @@ export default function FinanceApprovalsPage() {
     }
   ]
 
-  const rejectedApprovals = [
+  const rejectedApprovals: RejectedApproval[] = [
     {
       id: '4',
       type: 'disposal',
@@ -99,8 +135,8 @@ export default function FinanceApprovalsPage() {
       priority: 'low',
       status: 'rejected',
       submittedAt: '2024-01-08T16:45:00Z',
-      approvedAt: '2024-01-09T10:20:00Z',
-      approvedBy: 'Robert Johnson',
+      rejectedAt: '2024-01-09T10:20:00Z',
+      rejectedBy: 'Robert Johnson',
       comments: 'Rejected - Items can be refurbished and reused instead of disposal'
     }
   ]
@@ -164,7 +200,7 @@ export default function FinanceApprovalsPage() {
     })
   }
 
-  const getCurrentApprovals = () => {
+  const getCurrentApprovals = (): Approval[] => {
     switch (activeTab) {
       case 'pending': return pendingApprovals
       case 'approved': return approvedApprovals
@@ -399,14 +435,14 @@ export default function FinanceApprovalsPage() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  Approved: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                  Approved: {approval.status === 'approved' ? formatDate(approval.approvedAt) : 'N/A'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
-                                  By: {approval.approvedBy || 'N/A'}
+                                  By: {approval.status === 'approved' ? approval.approvedBy : 'N/A'}
                                 </div>
                               </div>
-                              {approval.comments && (
+                              {approval.status === 'approved' && approval.comments && (
                                 <div className="mt-3 p-3 bg-green-50 rounded-lg">
                                   <p className="text-sm text-green-800"><strong>Comment:</strong> {approval.comments}</p>
                                 </div>
@@ -460,18 +496,18 @@ export default function FinanceApprovalsPage() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  Rejected: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                                                    Rejected: {approval.status === 'rejected' ? formatDate(approval.rejectedAt) : 'N/A'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
-                                  By: {approval.approvedBy || 'N/A'}
+                                  By: {approval.status === 'rejected' ? approval.rejectedBy : 'N/A'}
                                 </div>
                               </div>
-                              {approval.comments && (
+                              {approval.status === 'rejected' && approval.comments && (
                                 <div className="mt-3 p-3 bg-red-50 rounded-lg">
                                   <p className="text-sm text-red-800"><strong>Reason:</strong> {approval.comments}</p>
-              </div>
-            )}
+                                </div>
+                              )}
           </div>
                           </div>
                         </div>

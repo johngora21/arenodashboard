@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Poppins } from 'next/font/google'
 import { AuthProvider } from '@/components/AuthProvider'
-import InactivityWarning from '@/components/InactivityWarning'
+
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -24,8 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${poppins.variable} font-poppins antialiased`}>
         <AuthProvider>
-        {children}
-          <InactivityWarning />
+          {children}
         </AuthProvider>
       </body>
     </html>

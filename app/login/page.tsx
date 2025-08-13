@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2, CheckCircle } from "lucide-react"
-
+import { Eye, EyeOff, Mail, Lock, AlertCircle, Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const { user, signInWithEmail, loading, error, clearError } = useAuth()
@@ -20,17 +19,13 @@ export default function LoginPage() {
   })
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [resetSent, setResetSent] = useState(false)
-  const [resetLoading, setResetLoading] = useState(false)
 
-  // Redirect to dashboard if already authenticated
   useEffect(() => {
     if (!loading && user) {
       router.push('/')
     }
   }, [user, loading, router])
 
-  // Clear errors when component mounts
   useEffect(() => {
     clearError()
     setFormErrors({})
@@ -57,7 +52,6 @@ export default function LoginPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
-    // Clear field-specific error when user starts typing
     if (formErrors[field]) {
       setFormErrors(prev => ({ ...prev, [field]: "" }))
     }
@@ -71,26 +65,10 @@ export default function LoginPage() {
     setIsSubmitting(true)
     try {
       await signInWithEmail(formData.email, formData.password)
-      // Success - the useEffect will handle redirect
     } catch (err) {
       // Error is handled by the AuthProvider
     } finally {
       setIsSubmitting(false)
-    }
-  }
-
-  // Password reset
-  const handlePasswordReset = async () => {
-    setResetLoading(true)
-    setResetSent(false)
-    try {
-      // Use AuthProvider to send password reset email
-      await signInWithEmail(formData.email, '') // This will trigger password reset in AuthProvider
-      setResetSent(true)
-    } catch (err) {
-      setFormErrors(prev => ({ ...prev, email: 'Failed to send reset email. Make sure the email is correct.' }))
-    } finally {
-      setResetLoading(false)
     }
   }
 
@@ -108,15 +86,13 @@ export default function LoginPage() {
           <Card className="shadow-2xl border-0 rounded-3xl overflow-hidden">
             <CardHeader className="text-center pb-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white">
               <div className="flex justify-center mb-4">
-                <div className="bg-white p-3 rounded-2xl shadow-lg">
-                  <Image 
-                    src="/images/IrisLogo.png" 
-                    alt="iRis" 
-                    width={60} 
-                    height={60} 
-                    className="object-contain"
-                  />
-                </div>
+                <Image 
+                  src="/images/iRis-logo.png" 
+                  alt="iRis" 
+                  width={100} 
+                  height={100} 
+                  className="object-contain rounded-full"
+                />
               </div>
               <CardTitle className="text-2xl font-bold text-white">
                 Welcome to iRis
@@ -127,21 +103,13 @@ export default function LoginPage() {
             </CardHeader>
 
             <CardContent className="space-y-6 p-8">
-              {/* Error Message */}
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center space-x-3">
                   <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
                   <p className="text-red-700 text-sm">{error}</p>
                 </div>
               )}
-              {/* Password reset success */}
-              {resetSent && (
-                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center space-x-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                  <p className="text-green-700 text-sm">Password reset email sent! Check your inbox.</p>
-                </div>
-              )}
-              {/* Email/Password Form */}
+
               <form onSubmit={handleEmailAuth} className="space-y-5">
                 <div>
                   <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
@@ -175,7 +143,7 @@ export default function LoginPage() {
                   <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
                     Password
                   </label>
-                  <div className="relative">
+                  <div className="redirect relative">
                     <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                       id="password"
@@ -222,15 +190,14 @@ export default function LoginPage() {
                   )}
                 </Button>
               </form>
-              {/* Forgot/Change Password */}
+
               <div className="flex justify-end">
                 <button
                   type="button"
                   className="text-sm text-orange-600 hover:underline focus:outline-none"
-                  onClick={handlePasswordReset}
-                  disabled={resetLoading || !formData.email}
+                  onClick={() => router.push('/reset-password')}
                 >
-                  {resetLoading ? 'Sending reset email...' : 'Forgot/Change Password?'}
+                  Forgot Password?
                 </button>
               </div>
             </CardContent>
@@ -239,4 +206,4 @@ export default function LoginPage() {
       )}
     </div>
   )
-} 
+}

@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
+import { departmentsAPI } from "@/lib/api-service"
 import { 
   Building, 
   Users, 
@@ -35,50 +36,21 @@ import {
   Mail
 } from "lucide-react"
 // Mock data types - replace with MySQL types later
-interface Department {
-  id: string
-  name: string
-  branchId: string
-  branchName: string
-  code: string
-  location: string
-  description: string
-  manager: string
-  budget: number
-  employeeCount: number
-  status: string
-  createdAt: Date
-  updatedAt: Date
-}
 
-interface DepartmentStats {
-  totalDepartments: number
-  activeDepartments: number
-  totalEmployees: number
-  averageBudget: number
-  departmentsByStatus: { [key: string]: number }
-}
 
-interface Employee {
-  id: string
-  name: string
-  email: string
-  position: string
-  department: string
-  status: string
-}
+
+
+
 
 interface NewDepartmentForm {
   name: string
-  branchId: string
-  branchName: string
   code: string
-  location: string
   description: string
-  manager: string
   budget: number
-  employeeCount: number
-  status: string
+  status: 'active' | 'inactive' | 'restructuring'
+  location?: string
+  manager_id?: string
+  established_date?: string
 }
 
 export default function DepartmentsPage() {
@@ -136,142 +108,68 @@ export default function DepartmentsPage() {
 
   // Mock functions
   const getAllDepartments = async (): Promise<Department[]> => {
-    return new Promise(resolve => setTimeout(() => resolve(mockDepartments), 500))
+    try {
+      const response = await departmentsAPI.getAll(searchTerm, selectedStatus)
+      return response.data || response
+    } catch (error) {
+      console.error('Failed to fetch departments:', error)
+      return []
+    }
   }
 
   const getDepartmentStats = async (): Promise<DepartmentStats> => {
-    return new Promise(resolve => setTimeout(() => resolve({
-      totalDepartments: mockDepartments.length,
-      activeDepartments: mockDepartments.filter(d => d.status === 'active').length,
-      totalEmployees: mockDepartments.reduce((sum, d) => sum + d.employeeCount, 0),
-      averageBudget: mockDepartments.reduce((sum, d) => sum + d.budget, 0) / mockDepartments.length,
-      departmentsByStatus: mockDepartments.reduce((acc, d) => {
-        acc[d.status] = (acc[d.status] || 0) + 1
-        return acc
-      }, {} as { [key: string]: number })
-    }), 500))
+    try {
+      const response = await departmentsAPI.getStats()
+      return response.data || response
+    } catch (error) {
+      console.error('Failed to fetch department stats:', error)
+      return {
+        totalDepartments: 0,
+        activeDepartments: 0,
+        totalEmployees: 0,
+        averageBudget: 0,
+        departmentsByStatus: {
+          active: 0,
+          inactive: 0,
+          restructuring: 0
+        }
+      }
+    }
   }
 
   const addDepartment = async (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const newDept: Department = {
-          ...department,
-          id: Date.now().toString(),
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-        mockDepartments.push(newDept)
-        resolve(newDept.id)
-      }, 500)
-    })
+    try {
+      const response = await departmentsAPI.create(department)
+      return response.data?.id || response.id || 'success'
+    } catch (error) {
+      console.error('Failed to create department:', error)
+      throw error
+    }
   }
 
   const updateDepartment = async (id: string, updates: Partial<Department>): Promise<void> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const index = mockDepartments.findIndex(d => d.id === id)
-        if (index !== -1) {
-          mockDepartments[index] = { ...mockDepartments[index], ...updates, updatedAt: new Date() }
-        }
-        resolve()
-      }, 500)
-    })
+    try {
+      await departmentsAPI.update(id, updates)
+    } catch (error) {
+      console.error('Failed to update department:', error)
+      throw error
+    }
   }
 
   const deleteDepartment = async (id: string): Promise<void> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const index = mockDepartments.findIndex(d => d.id === id)
-        if (index !== -1) {
-          mockDepartments.splice(index, 1)
-        }
-        resolve()
-      }, 500)
-    })
+    try {
+      await departmentsAPI.delete(id)
+    } catch (error) {
+      console.error('Failed to delete department:', error)
+      throw error
+    }
   }
 
-  const searchDepartments = async (query: string): Promise<Department[]> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const filtered = mockDepartments.filter(d => 
-          d.name.toLowerCase().includes(query.toLowerCase()) ||
-          d.code.toLowerCase().includes(query.toLowerCase()) ||
-          d.manager.toLowerCase().includes(query.toLowerCase())
-        )
-        resolve(filtered)
-      }, 300)
-    })
-  }
 
-  const getEmployeesByDepartment = async (departmentId: string): Promise<Employee[]> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const dept = mockDepartments.find(d => d.id === departmentId)
-        if (dept) {
-          const mockEmployees: Employee[] = Array.from({ length: dept.employeeCount }, (_, i) => ({
-            id: `${departmentId}-emp-${i + 1}`,
-            name: `Employee ${i + 1}`,
-            email: `emp${i + 1}@${dept.name.toLowerCase()}.com`,
-            position: 'Staff Member',
-            department: dept.name,
-            status: 'active'
-          }))
-          resolve(mockEmployees)
-        } else {
-          resolve([])
-        }
-      }, 300)
-    })
-  }
 
-  const seedDepartmentSampleData = async (): Promise<void> => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        // Add sample departments if they don't exist
-        const sampleDepartments = [
-          {
-            id: '4',
-            name: 'Marketing',
-            branchId: '1',
-            branchName: 'Dar es Salaam Main Branch',
-            code: 'MKT',
-            location: 'Floor 2, Building B',
-            description: 'Marketing and communications',
-            manager: 'Sarah Wilson',
-            budget: 400000,
-            employeeCount: 12,
-            status: 'active',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: '5',
-            name: 'Finance',
-            branchId: '1',
-            branchName: 'Dar es Salaam Main Branch',
-            code: 'FIN',
-            location: 'Floor 1, Building B',
-            description: 'Financial management and accounting',
-            manager: 'Tom Anderson',
-            budget: 600000,
-            employeeCount: 18,
-            status: 'active',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ]
-        
-        sampleDepartments.forEach(dept => {
-          if (!mockDepartments.find(d => d.id === dept.id)) {
-            mockDepartments.push(dept)
-          }
-        })
-        
-        resolve()
-      }, 500)
-    })
-  }
+
+
+
 
   const [departments, setDepartments] = useState<Department[]>([])
   const [stats, setStats] = useState<DepartmentStats | null>(null)
@@ -280,39 +178,22 @@ export default function DepartmentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [showAddDepartment, setShowAddDepartment] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
-  const [departmentEmployees, setDepartmentEmployees] = useState<Employee[]>([])
+
   const [formLoading, setFormLoading] = useState(false)
   const [formData, setFormData] = useState<NewDepartmentForm>({
     name: '',
-    branchId: '',
-    branchName: '',
     code: '',
-    location: '',
     description: '',
-    manager: '',
     budget: 0,
-    employeeCount: 0,
-    status: 'active'
+    status: 'active',
+    location: '',
+    manager_id: '',
+    established_date: ''
   })
 
-  // Mock branches data
-  const branches = [
-    { id: '1', name: 'Dar es Salaam Main Branch', city: 'Dar es Salaam' },
-    { id: '2', name: 'Arusha Branch', city: 'Arusha' },
-    { id: '3', name: 'Mwanza Branch', city: 'Mwanza' },
-    { id: '4', name: 'Dodoma Branch', city: 'Dodoma' },
-    { id: '5', name: 'Tanga Branch', city: 'Tanga' },
-    { id: '6', name: 'Mbeya Branch', city: 'Mbeya' }
-  ]
 
-  const handleBranchChange = (branchId: string) => {
-    const selectedBranch = branches.find(branch => branch.id === branchId)
-    setFormData(prev => ({
-      ...prev,
-      branchId,
-      branchName: selectedBranch?.name || ''
-    }))
-  }
+
+
 
   useEffect(() => {
     if (false) { // Temporarily disabled authentication
@@ -357,8 +238,7 @@ export default function DepartmentsPage() {
     
     // Validate required fields
     if (!formData.name || !formData.code || !formData.description || 
-        !formData.manager || !formData.location || !formData.budget || 
-        !formData.employeeCount) {
+        !formData.budget) {
       alert('Please fill in all required fields')
       return
     }
@@ -371,11 +251,11 @@ export default function DepartmentsPage() {
         name: formData.name,
         code: formData.code.toUpperCase(),
         description: formData.description,
-        manager: formData.manager,
-        location: formData.location,
         budget: formData.budget,
-        employeeCount: formData.employeeCount,
-        status: formData.status
+        status: formData.status,
+        location: formData.location || undefined,
+        manager_id: formData.manager_id || undefined,
+        established_date: formData.established_date || undefined
       }
 
       console.log('Creating department with data:', departmentData)
@@ -386,15 +266,13 @@ export default function DepartmentsPage() {
       // Reset form and close modal
       setFormData({
         name: '',
-        branchId: '',
-        branchName: '',
         code: '',
         description: '',
-        manager: '',
-        location: '',
         budget: 0,
-        employeeCount: 0,
-        status: 'active'
+        status: 'active',
+        location: '',
+        manager_id: '',
+        established_date: ''
       })
       setShowAddDepartment(false)
       
@@ -431,33 +309,9 @@ export default function DepartmentsPage() {
     }
   }
 
-  const handleSeedSampleData = async () => {
-    if (!confirm('This will add sample department data. Continue?')) {
-      return
-    }
 
-    try {
-      setDataLoading(true)
-      await seedDepartmentSampleData()
-      await loadDepartmentsData()
-      alert('Sample data added successfully!')
-    } catch (error) {
-      console.error('Error seeding sample data:', error)
-      alert('Error adding sample data. Please try again.')
-    } finally {
-      setDataLoading(false)
-    }
-  }
 
-  const handleViewEmployees = async (departmentId: string) => {
-    try {
-      const employees = await getEmployeesByDepartment(departmentId)
-      setDepartmentEmployees(employees)
-    } catch (error) {
-      console.error('Error loading department employees:', error)
-      alert('Error loading employees. Please try again.')
-    }
-  }
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -518,8 +372,7 @@ export default function DepartmentsPage() {
       department.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       department.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       department.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      department.manager.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      department.location.toLowerCase().includes(searchTerm.toLowerCase())
+      (department.location && department.location.toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesStatus = statusFilter === "all" || department.status === statusFilter
     
@@ -677,12 +530,6 @@ export default function DepartmentsPage() {
                           Department
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          Manager
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                          Employees
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                           Budget
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
@@ -710,14 +557,7 @@ export default function DepartmentsPage() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-slate-900">{department.manager}</div>
-                            <div className="text-sm text-slate-500">{department.location}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-semibold text-slate-900">{department.employeeCount}</div>
-                            <div className="text-sm text-slate-500">employees</div>
-                          </td>
+
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm font-semibold text-slate-900">{formatCurrency(department.budget)}</div>
                             <div className="text-sm text-slate-500">annual budget</div>
@@ -733,7 +573,6 @@ export default function DepartmentsPage() {
                               <button 
                                 onClick={() => {
                                   setSelectedDepartment(department)
-                                  handleViewEmployees(department.id)
                                 }}
                                 className="text-slate-400 hover:text-slate-600"
                                 title="View details"
@@ -815,8 +654,6 @@ export default function DepartmentsPage() {
                 <div className="bg-slate-50 rounded-xl p-4">
                   <h3 className="text-lg font-semibold text-slate-900 mb-4">Management & Budget</h3>
                   <div className="space-y-2">
-                    <div><span className="font-medium">Manager:</span> {selectedDepartment.manager}</div>
-                    <div><span className="font-medium">Employee Count:</span> {selectedDepartment.employeeCount}</div>
                     <div><span className="font-medium">Annual Budget:</span> {formatCurrency(selectedDepartment.budget)}</div>
                     <div><span className="font-medium">Created:</span> {formatTimestamp(selectedDepartment.createdAt)}</div>
                   </div>
@@ -828,29 +665,7 @@ export default function DepartmentsPage() {
                 <p className="text-slate-700">{selectedDepartment.description}</p>
               </div>
 
-              {/* Department Employees */}
-              <div className="bg-slate-50 rounded-xl p-4">
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Department Employees ({departmentEmployees.length})</h3>
-                {departmentEmployees.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {departmentEmployees.map((employee) => (
-                      <div key={employee.id} className="bg-white rounded-lg p-3 border border-slate-200">
-                        <div className="flex items-center space-x-3">
-                          <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
-                            <User className="h-4 w-4 text-orange-600" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-900 truncate">{employee.name}</p>
-                            <p className="text-xs text-slate-500">{employee.position}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-slate-500">No employees assigned to this department.</p>
-                )}
-              </div>
+
             </div>
 
             <div className="p-6 border-t border-slate-200 bg-slate-50">
@@ -915,35 +730,18 @@ export default function DepartmentsPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="branch" className="block text-sm font-medium text-slate-700 mb-2">
-                    Select Branch *
+                  <label htmlFor="manager" className="block text-sm font-medium text-slate-700 mb-2">
+                    Manager (Optional)
                   </label>
-                  <select
-                    id="branch"
-                    value={formData.branchId}
-                    onChange={(e) => handleBranchChange(e.target.value)}
+                  <input
+                    type="text"
+                    id="manager"
+                    value={formData.manager_id}
+                    onChange={(e) => handleInputChange('manager_id', e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
-                    required
-                  >
-                    <option value="">Choose a branch</option>
-                    {branches.map((branch) => (
-                      <option key={branch.id} value={branch.id}>
-                        {branch.name} - {branch.city}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Enter manager ID or leave empty"
+                  />
                 </div>
-
-                {formData.branchName && (
-                  <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center gap-2">
-                      <Building className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-800">
-                        Selected Branch: {formData.branchName}
-                      </span>
-                    </div>
-                  </div>
-                )}
 
                 <div>
                   <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-2">
@@ -963,7 +761,7 @@ export default function DepartmentsPage() {
 
                 <div>
                   <label htmlFor="location" className="block text-sm font-medium text-slate-700 mb-2">
-                    Location *
+                    Location (Optional)
                   </label>
                   <input
                     type="text"
@@ -972,7 +770,6 @@ export default function DepartmentsPage() {
                     onChange={(e) => handleInputChange('location', e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white text-slate-900"
                     placeholder="e.g., Dar es Salaam"
-                    required
                   />
                 </div>
 

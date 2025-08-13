@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (false) { // Temporarily disabled authentication
+    if (!user && !loading) {
       console.log('No user authenticated, redirecting to login...')
       router.push('/login')
     }

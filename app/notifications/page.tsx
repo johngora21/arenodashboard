@@ -225,7 +225,7 @@ export default function NotificationsPage() {
             {/* Header */}
             <div className="mb-6">
               <div className="flex items-center justify-between">
-                <div>
+              <div>
                   <h1 className="text-2xl font-bold text-slate-900">Notifications</h1>
                   <p className="text-slate-600">Stay updated with important updates and alerts</p>
                 </div>
@@ -239,7 +239,7 @@ export default function NotificationsPage() {
                   >
                     Mark All as Read
                   </button>
-                </div>
+              </div>
               </div>
             </div>
 
@@ -264,7 +264,7 @@ export default function NotificationsPage() {
                     <option value="sales">Sales</option>
                     <option value="general">General</option>
                   </select>
-                </div>
+          </div>
 
                 {/* Search */}
                 <div className="flex-1">
@@ -278,7 +278,7 @@ export default function NotificationsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                </div>
+                    </div>
 
                 {/* Unread Only Toggle */}
                 <div className="flex items-end">
@@ -291,9 +291,9 @@ export default function NotificationsPage() {
                     />
                     <span className="text-sm text-slate-700">Show unread only</span>
                   </label>
-                </div>
-              </div>
-            </div>
+                      </div>
+                      </div>
+                    </div>
 
             {/* Notifications List */}
             <div className="space-y-3">
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
                       ? 'Try adjusting your filters or search terms.'
                       : 'You\'re all caught up!'}
                   </p>
-                </div>
+                      </div>
               ) : (
                 filteredNotifications.map((notification) => (
                   <div
@@ -331,7 +331,7 @@ export default function NotificationsPage() {
                       {/* Icon */}
                       <div className="flex-shrink-0 mt-1">
                         {getTypeIcon(notification.type)}
-                      </div>
+              </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0">
@@ -372,8 +372,8 @@ export default function NotificationsPage() {
                                 >
                                   Delete
                                 </button>
-                              </div>
-                            </div>
+                          </div>
+                        </div>
                           </div>
                         </div>
                       </div>
@@ -381,9 +381,9 @@ export default function NotificationsPage() {
                   </div>
                 ))
               )}
-            </div>
-          </div>
-        </div>
+                        </div>
+                      </div>
+                    </div>
       </div>
     </div>
   )

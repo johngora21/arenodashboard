@@ -31,7 +31,8 @@ import {
   CheckCircle,
   PieChart,
   LineChart,
-  BarChart
+  BarChart,
+  Shield
 } from "lucide-react"
 
 export default function AdminDashboardPage() {
@@ -438,6 +439,40 @@ export default function AdminDashboardPage() {
             </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-blue-50"
+              onClick={() => router.push('/rbac-demo')}
+            >
+              <Shield className="h-6 w-6 text-blue-600" />
+              <span className="text-sm font-medium">RBAC Demo</span>
+              <span className="text-xs text-slate-500">Test Access Control</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-green-50"
+              onClick={() => router.push('/hr/user-access-management')}
+            >
+              <Users className="h-6 w-6 text-green-600" />
+              <span className="text-sm font-medium">User Access</span>
+              <span className="text-xs text-slate-500">Manage Permissions</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="h-20 flex flex-col items-center justify-center gap-2 hover:bg-orange-50"
+              onClick={() => router.push('/user-management')}
+            >
+              <Settings className="h-6 w-6 text-orange-600" />
+              <span className="text-sm font-medium">User Management</span>
+              <span className="text-xs text-slate-500">Manage Users</span>
+            </Button>
           </div>
         </div>
 

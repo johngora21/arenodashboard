@@ -82,6 +82,23 @@ export default function HRReportsPage() {
       approvedAt: '2024-01-12T15:30:00Z',
       approvedBy: 'Jane Smith',
       comments: 'Approved - Safety equipment is essential for compliance'
+    },
+    {
+      id: '5',
+      type: 'transfer',
+      title: 'IT Equipment Transfer',
+      description: 'Transfer of 3 laptops from Dar es Salaam to Arusha branch',
+      requester: 'Mike Wilson',
+      requesterRole: 'IT Support',
+      department: 'Information Technology',
+      branch: 'Arusha Branch',
+      totalValue: 2100000,
+      priority: 'medium',
+      status: 'approved',
+      submittedAt: '2024-01-05T09:15:00Z',
+      approvedAt: '2024-01-07T14:20:00Z',
+      approvedBy: 'Sarah Johnson',
+      comments: 'Approved - Equipment needed for new branch setup'
     }
   ]
 
@@ -99,8 +116,8 @@ export default function HRReportsPage() {
       priority: 'low',
       status: 'rejected',
       submittedAt: '2024-01-08T16:45:00Z',
-      approvedAt: '2024-01-09T10:20:00Z',
-      approvedBy: 'Robert Johnson',
+      rejectedAt: '2024-01-09T10:20:00Z',
+      rejectedBy: 'Robert Johnson',
       comments: 'Rejected - Items can be refurbished and reused instead of disposal'
     }
   ]
@@ -399,16 +416,16 @@ export default function HRReportsPage() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  Approved: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                  Approved: {(approval as any).approvedAt ? formatDate((approval as any).approvedAt) : 'N/A'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
-                                  By: {approval.approvedBy || 'N/A'}
+                                  By: {(approval as any).approvedBy || 'N/A'}
                                 </div>
                               </div>
-                              {approval.comments && (
+                              {(approval as any).comments && (
                                 <div className="mt-3 p-3 bg-green-50 rounded-lg">
-                                  <p className="text-sm text-green-800"><strong>Comment:</strong> {approval.comments}</p>
+                                  <p className="text-sm text-green-800"><strong>Comment:</strong> {(approval as any).comments}</p>
                                 </div>
                               )}
                             </div>
@@ -460,18 +477,18 @@ export default function HRReportsPage() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  Rejected: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                  Rejected: {(approval as any).rejectedAt ? formatDate((approval as any).rejectedAt) : 'N/A'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
-                                  By: {approval.approvedBy || 'N/A'}
+                                  By: {(approval as any).rejectedBy || 'N/A'}
                                 </div>
                               </div>
-                              {approval.comments && (
+                                                            {(approval as any).comments && (
                                 <div className="mt-3 p-3 bg-red-50 rounded-lg">
-                                  <p className="text-sm text-red-800"><strong>Reason:</strong> {approval.comments}</p>
-                  </div>
-                )}
+                                  <p className="text-sm text-red-800"><strong>Reason:</strong> {(approval as any).comments}</p>
+                                </div>
+                              )}
               </div>
             </div>
           </div>

@@ -42,8 +42,7 @@ import {
   Video,
   Headphones,
   Monitor,
-  Book,
-  Certificate
+  Book
 } from "lucide-react"
 import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"

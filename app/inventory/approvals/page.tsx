@@ -399,11 +399,11 @@ export default function InventoryApprovalsPage() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  Approved: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                  Approved: {(approval as any).approvedAt ? formatDate((approval as any).approvedAt) : 'N/A'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
-                                  By: {approval.approvedBy || 'N/A'}
+                                  By: {(approval as any).approvedBy || 'N/A'}
                                 </div>
                               </div>
                               {approval.comments && (
@@ -460,11 +460,11 @@ export default function InventoryApprovalsPage() {
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Calendar className="h-4 w-4" />
-                                  Rejected: {approval.approvedAt ? formatDate(approval.approvedAt) : 'N/A'}
+                                  Rejected: {(approval as any).rejectedAt ? formatDate((approval as any).rejectedAt) : 'N/A'}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <User className="h-4 w-4" />
-                                  By: {approval.approvedBy || 'N/A'}
+                                  By: {(approval as any).rejectedBy || 'N/A'}
                                 </div>
                               </div>
                               {approval.comments && (

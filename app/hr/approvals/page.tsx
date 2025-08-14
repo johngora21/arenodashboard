@@ -69,11 +69,11 @@ const getTeamMemberAvailability = async (): Promise<any[]> => {
   return new Promise(resolve => setTimeout(() => resolve([]), 300))
 }
 
-const getApprovalsByDepartment = async (): Promise<any[]> => {
+const getApprovalsByDepartment = async (department?: string): Promise<any[]> => {
   return new Promise(resolve => setTimeout(() => resolve([]), 300))
 }
 
-const getApprovalHistoryByDepartmentAndStatus = async (): Promise<any[]> => {
+const getApprovalHistoryByDepartmentAndStatus = async (department?: string, status?: string): Promise<any[]> => {
   return new Promise(resolve => setTimeout(() => resolve([]), 300))
 }
 

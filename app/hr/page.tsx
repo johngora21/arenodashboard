@@ -157,6 +157,13 @@ export default function HRPage() {
               </div>
               <div className="flex space-x-3">
                 <a 
+                  href="/hr/user-access-management"
+                  className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  User Access
+                </a>
+                <a 
                   href="/hr/reports"
                   className="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-md transition-colors"
                 >
@@ -165,7 +172,7 @@ export default function HRPage() {
                 </a>
                 <a 
                   href="/hr/reports"
-                  className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                  className="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors"
                 >
                   <CheckCircle className="h-4 w-4 mr-2" />
                   Approve

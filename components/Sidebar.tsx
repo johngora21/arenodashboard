@@ -1,6 +1,5 @@
 "use client"
 
-
 import { 
   LayoutDashboard, 
   FileText, 
@@ -22,34 +21,86 @@ import { usePathname } from "next/navigation"
 import Image from 'next/image'
 import { useAuth } from './AuthProvider'
 
-
-const navigation = [
-  { id: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { id: 'branches', name: 'Branches', href: '/branches', icon: Building2 },
-  { id: 'departments', name: 'Departments', href: '/departments', icon: Users },
-  { id: 'sales', name: 'Sales', href: '/sales', icon: TrendingUp },
-  { id: 'finance', name: 'Finance', href: '/finance', icon: DollarSign },
-  { id: 'inventory', name: 'Inventory', href: '/inventory', icon: Database },
-  { id: 'hr', name: 'HR', href: '/hr', icon: Briefcase },
-  { id: 'crm', name: 'CRM', href: '/crm', icon: UserPlus },
-  { id: 'projects', name: 'Projects', href: '/projects', icon: FileText },
-  { id: 'tasks', name: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { id: 'reports', name: 'Reports', href: '/reports', icon: BarChart3 },
-  { id: 'events', name: 'Events', href: '/events', icon: Calendar },
-  { id: 'settings', name: 'Settings', href: '/settings', icon: Settings },
+// Define all possible navigation items with their required permissions
+const allNavigationItems = [
+  { id: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard, permissions: ['dashboard_access'] },
+  { id: 'branches', name: 'Branches', href: '/branches', icon: Building2, permissions: ['branches_access'] },
+  { id: 'departments', name: 'Departments', href: '/departments', icon: Users, permissions: ['departments_access'] },
+  { id: 'sales', name: 'Sales', href: '/sales', icon: TrendingUp, permissions: ['sales_access'] },
+  { id: 'finance', name: 'Finance', href: '/finance', icon: DollarSign, permissions: ['finance_access'] },
+  { id: 'inventory', name: 'Inventory', href: '/inventory', icon: Database, permissions: ['inventory_access'] },
+  { id: 'hr', name: 'HR', href: '/hr', icon: Briefcase, permissions: ['hr_access'] },
+  { id: 'crm', name: 'CRM', href: '/crm', icon: UserPlus, permissions: ['crm_access'] },
+  { id: 'projects', name: 'Projects', href: '/projects', icon: FileText, permissions: ['projects_access'] },
+  { id: 'tasks', name: 'Tasks', href: '/tasks', icon: CheckSquare, permissions: ['tasks_access'] },
+  { id: 'reports', name: 'Reports', href: '/reports', icon: BarChart3, permissions: ['reports_access'] },
+  { id: 'events', name: 'Events', href: '/events', icon: Calendar, permissions: ['events_access'] },
+  { id: 'settings', name: 'Settings', href: '/settings', icon: Settings, permissions: ['settings_access'] },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const { user, signOut } = useAuth()
+  const { user, logout, canAccessFeature, isSuperAdmin, isHR } = useAuth()
+
+  // Filter navigation items based on user permissions and HR settings
+  const getVisibleNavigationItems = () => {
+    if (!user) return []
+    
+    // Super Admin sees everything
+    if (isSuperAdmin()) {
+      return allNavigationItems
+    }
+    
+    // Filter based on user's allowed sidebar features and permissions
+    return allNavigationItems.filter(item => {
+      // Check if HR has allowed this feature for the user
+      const hasFeatureAccess = canAccessFeature(item.id)
+      
+      // Check if user has the required permissions
+      const hasRequiredPermissions = item.permissions.some(permission => 
+        user.permissions.includes(permission) || user.permissions.includes('all_access')
+      )
+      
+      return hasFeatureAccess && hasRequiredPermissions
+    })
+  }
+
+  const visibleNavigationItems = getVisibleNavigationItems()
 
   const handleLogout = async () => {
     try {
-      await signOut()
+      await logout()
       // The AuthProvider will handle the redirect to login
     } catch (error) {
       console.error('Error signing out:', error)
     }
+  }
+
+  // Show role indicator for HR and Super Admin
+  const getRoleIndicator = () => {
+    if (!user) return null
+    
+    if (isSuperAdmin()) {
+      return (
+        <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium mb-2">
+          Super Admin
+        </div>
+      )
+    }
+    
+    if (isHR()) {
+      return (
+        <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium mb-2">
+          HR Manager
+        </div>
+      )
+    }
+    
+    return (
+      <div className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full text-xs font-medium mb-2">
+        {user.role}
+      </div>
+    )
   }
 
   return (
@@ -72,28 +123,48 @@ export default function Sidebar() {
           </div>
         </div>
 
+        {/* User Role Indicator */}
+        {user && (
+          <div className="px-4 py-2 border-b border-slate-800">
+            {getRoleIndicator()}
+            <div className="text-xs text-slate-400">
+              {user.name} • {user.department || 'No Department'}
+            </div>
+          </div>
+        )}
+
         {/* Navigation - Takes remaining space */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-2">
-            {navigation.map((item) => {
-              const isActive = pathname === item.href
-              return (
-                <li key={item.id}>
-                  <Link
-                    href={item.href}
-                    className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                      isActive 
-                        ? 'bg-orange-500 text-white' 
-                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+          {visibleNavigationItems.length > 0 ? (
+            <ul className="space-y-2">
+              {visibleNavigationItems.map((item) => {
+                const isActive = pathname === item.href
+                return (
+                  <li key={item.id}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                        isActive 
+                          ? 'bg-orange-500 text-white' 
+                          : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <div className="text-center py-8">
+              <div className="text-slate-400 text-sm">
+                <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No features available</p>
+                <p className="text-xs mt-1">Contact HR for access</p>
+              </div>
+            </div>
+          )}
         </nav>
 
         {/* Logout Section - Fixed at bottom */}

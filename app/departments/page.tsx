@@ -6,7 +6,7 @@ import Sidebar from "@/components/Sidebar"
 import Header from "@/components/Header"
 import { useAuth } from "@/components/AuthProvider"
 import { useRouter } from "next/navigation"
-import { departmentsAPI } from "@/lib/api-service"
+import { departmentsAPI, Department, DepartmentStats } from "@/lib/api-service"
 import { 
   Building, 
   Users, 
@@ -35,6 +35,8 @@ import {
   Phone,
   Mail
 } from "lucide-react"
+
+
 // Mock data types - replace with MySQL types later
 
 
@@ -57,60 +59,13 @@ export default function DepartmentsPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
 
-  // Mock data
-  const mockDepartments: Department[] = [
-    {
-      id: '1',
-      name: 'Engineering',
-      branchId: '1',
-      branchName: 'Dar es Salaam Main Branch',
-      code: 'ENG',
-      location: 'Floor 3, Building A',
-      description: 'Software development and technical operations',
-      manager: 'John Doe',
-      budget: 500000,
-      employeeCount: 25,
-      status: 'active',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
-    },
-    {
-      id: '2',
-      name: 'Sales',
-      branchId: '1',
-      branchName: 'Dar es Salaam Main Branch',
-      code: 'SALES',
-      location: 'Floor 2, Building A',
-      description: 'Sales and customer relations',
-      manager: 'Jane Smith',
-      budget: 300000,
-      employeeCount: 15,
-      status: 'active',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
-    },
-    {
-      id: '3',
-      name: 'HR',
-      branchId: '1',
-      branchName: 'Dar es Salaam Main Branch',
-      code: 'HR',
-      location: 'Floor 1, Building A',
-      description: 'Human resources and employee management',
-      manager: 'Mike Johnson',
-      budget: 200000,
-      employeeCount: 8,
-      status: 'active',
-      createdAt: new Date('2024-01-01'),
-      updatedAt: new Date('2024-01-01')
-    }
-  ]
+
 
   // Mock functions
   const getAllDepartments = async (): Promise<Department[]> => {
     try {
-      const response = await departmentsAPI.getAll(searchTerm, selectedStatus)
-      return response.data || response
+      const response = await departmentsAPI.getAll(searchTerm, statusFilter)
+      return response
     } catch (error) {
       console.error('Failed to fetch departments:', error)
       return []
@@ -120,7 +75,7 @@ export default function DepartmentsPage() {
   const getDepartmentStats = async (): Promise<DepartmentStats> => {
     try {
       const response = await departmentsAPI.getStats()
-      return response.data || response
+      return response
     } catch (error) {
       console.error('Failed to fetch department stats:', error)
       return {
@@ -140,7 +95,7 @@ export default function DepartmentsPage() {
   const addDepartment = async (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
     try {
       const response = await departmentsAPI.create(department)
-      return response.data?.id || response.id || 'success'
+      return response.id || 'success'
     } catch (error) {
       console.error('Failed to create department:', error)
       throw error
@@ -178,6 +133,7 @@ export default function DepartmentsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [showAddDepartment, setShowAddDepartment] = useState(false)
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
+  const [departmentEmployees, setDepartmentEmployees] = useState<any[]>([])
 
   const [formLoading, setFormLoading] = useState(false)
   const [formData, setFormData] = useState<NewDepartmentForm>({
@@ -346,10 +302,10 @@ export default function DepartmentsPage() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active': return <CheckCircle className="h-4 w-4" />
-      case 'inactive': return <AlertCircle className="h-4 w-4" />
-      case 'restructuring': return <Clock className="h-4 w-4" />
-      default: return <AlertCircle className="h-4 w-4" />
+      case 'active': return <CheckCircle className="h-4 w-4" /> as any
+      case 'inactive': return <AlertCircle className="h-4 w-4" /> as any
+      case 'restructuring': return <Clock className="h-4 w-4" /> as any
+      default: return <AlertCircle className="h-4 w-4" /> as any
     }
   }
 

@@ -179,7 +179,7 @@ export default function ChatPage() {
       setNewGroupName('')
       setSelectedMembers([])
       setShowCreateGroup(false)
-      setSelectedGroup(newGroup)
+        setSelectedGroup(newGroup)
     }
   }
 
@@ -191,7 +191,7 @@ export default function ChatPage() {
     
     if (existingChat) {
       setSelectedGroup(existingChat)
-    } else {
+      } else {
       const newDirectChat: ChatGroup = {
         id: Date.now().toString(),
         name: employee.name,
@@ -315,12 +315,12 @@ export default function ChatPage() {
                       {group.lastMessage && (
                         <p className="text-sm text-slate-500 truncate">
                           {group.lastMessage}
-                        </p>
+                      </p>
                       )}
                       {group.lastMessageTime && (
-                        <p className="text-xs text-slate-400">
+                      <p className="text-xs text-slate-400">
                           {formatDate(group.lastMessageTime)}
-                        </p>
+                      </p>
                       )}
                     </div>
                   </div>
@@ -332,26 +332,26 @@ export default function ChatPage() {
           {/* Chat Messages Area */}
           <div className="flex-1 flex flex-col">
             {selectedGroup ? (
-              <>
-                {/* Chat Header */}
-                <div className="p-4 border-b border-slate-200 bg-white">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
+          <>
+            {/* Chat Header */}
+            <div className="p-4 border-b border-slate-200 bg-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
                       <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
                         <span className="text-blue-600 font-semibold">
-                          {getInitials(selectedGroup.name)}
-                        </span>
-                      </div>
-                      <div>
+                      {getInitials(selectedGroup.name)}
+                    </span>
+                  </div>
+                  <div>
                         <h2 className="text-lg font-semibold text-slate-900">
                           {selectedGroup.name}
                         </h2>
-                        <p className="text-sm text-slate-500">
-                          {selectedGroup.members.length} members • {selectedGroup.type}
-                        </p>
+                    <p className="text-sm text-slate-500">
+                      {selectedGroup.members.length} members • {selectedGroup.type}
+                    </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
                       <button className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -367,12 +367,12 @@ export default function ChatPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                         </svg>
                       </button>
-                    </div>
-                  </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -391,26 +391,26 @@ export default function ChatPage() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                             <span className="text-sm font-medium">{message.fileName}</span>
-                          </div>
-                        ) : (
+                            </div>
+                                ) : (
                           <p className="text-sm">{message.text}</p>
-                        )}
+                              )}
                         <p className={`text-xs mt-1 ${
                           message.sender === 'You' ? 'text-blue-100' : 'text-slate-500'
                         }`}>
                           {formatTime(message.timestamp)}
                         </p>
-                      </div>
-                    </div>
+                            </div>
+                          </div>
                   ))}
-                  <div ref={messagesEndRef} />
-                </div>
+              <div ref={messagesEndRef} />
+            </div>
 
-                {/* Message Input */}
-                <div className="p-4 border-t border-slate-200 bg-white">
-                  <div className="flex items-center space-x-2">
+            {/* Message Input */}
+            <div className="p-4 border-t border-slate-200 bg-white">
+              <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => fileInputRef.current?.click()}
+                  onClick={() => fileInputRef.current?.click()}
                       className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
                     >
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,35 +433,35 @@ export default function ChatPage() {
                     </button>
                     <div className="flex-1 relative">
                       <textarea
-                        value={newMessage}
+                  value={newMessage}
                         onChange={(e) => {
                           setNewMessage(e.target.value)
                           setIsTyping(e.target.value.length > 0)
                         }}
                         onKeyPress={handleKeyPress}
-                        placeholder="Type a message..."
+                  placeholder="Type a message..."
                         className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         rows={1}
-                      />
+                />
                     </div>
                     <button
-                      onClick={handleSendMessage}
-                      disabled={!newMessage.trim()}
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
                       className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                       </svg>
                     </button>
-                  </div>
+              </div>
                   {isTyping && (
                     <p className="text-xs text-slate-500 mt-2">Typing...</p>
                   )}
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
                   <svg
                     className="mx-auto h-12 w-12 text-slate-400"
                     fill="none"
@@ -479,13 +479,13 @@ export default function ChatPage() {
                   <p className="mt-1 text-sm text-slate-500">
                     Choose a conversation from the sidebar to start chatting.
                   </p>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
+          </div>
+      </div>
 
-        {/* Create Group Modal */}
+      {/* Create Group Modal */}
         {showCreateGroup && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-96 max-h-[80vh] overflow-y-auto">
@@ -500,22 +500,22 @@ export default function ChatPage() {
                   </svg>
                 </button>
               </div>
-              
-              <div className="space-y-4">
-                <div>
+          
+          <div className="space-y-4">
+            <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Group Name
                   </label>
                   <input
                     type="text"
-                    value={newGroupName}
-                    onChange={(e) => setNewGroupName(e.target.value)}
-                    placeholder="Enter group name"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                placeholder="Enter group name"
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                
-                <div>
+              />
+            </div>
+            
+            <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Select Members
                   </label>
@@ -528,14 +528,14 @@ export default function ChatPage() {
                           onChange={() => toggleMemberSelection(employee.name)}
                           className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <div>
+            <div>
                           <p className="text-sm font-medium text-slate-900">{employee.name}</p>
                           <p className="text-xs text-slate-500">{employee.position} • {employee.department}</p>
                         </div>
                       </label>
                     ))}
+            </div>
                   </div>
-                </div>
                 
                 <div className="flex space-x-3 pt-4">
                   <button
@@ -551,11 +551,11 @@ export default function ChatPage() {
                   >
                     Create Group
                   </button>
+                        </div>
+                      </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
         {/* Employee List Modal */}
         {showEmployeeList && (
@@ -571,7 +571,7 @@ export default function ChatPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
-              </div>
+          </div>
               
               {/* Search Tab */}
               <div className="mb-4">
@@ -596,9 +596,9 @@ export default function ChatPage() {
                       d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
                   </svg>
-                </div>
-              </div>
-              
+            </div>
+          </div>
+          
               <div className="space-y-2">
                 {employees
                   .filter(employee => 
@@ -616,12 +616,12 @@ export default function ChatPage() {
                       <span className="text-blue-600 font-semibold">
                         {getInitials(employee.name)}
                       </span>
-                    </div>
+          </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-slate-900">{employee.name}</p>
                       <p className="text-xs text-slate-500">{employee.position} • {employee.department}</p>
-                    </div>
-                  </div>
+              </div>
+              </div>
                 ))}
                 
                 {/* No results message */}
@@ -648,13 +648,13 @@ export default function ChatPage() {
                     <p className="mt-1 text-sm text-slate-500">
                       Try searching with a different term.
                     </p>
-                  </div>
+          </div>
                 )}
               </div>
+              </div>
             </div>
-          </div>
         )}
       </div>
     </div>
   )
-}
+} 

@@ -1,7 +1,6 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect } from 'react'
-import { authAPI } from '@/lib/api-service'
 
 interface Permission {
   id: string
@@ -72,6 +71,38 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// Mock user data - you can modify these as needed
+const MOCK_USERS = {
+  'johnjohngora@gmail.com': {
+    id: '1',
+    email: 'johnjohngora@gmail.com',
+    name: 'John Gora',
+    role: 'Super Admin',
+    roleId: '1',
+    roleDetails: {
+      id: '1',
+      name: 'Super Admin',
+      description: 'Full system access and control',
+      level: 'executive',
+      permissions: ['all_access'],
+      sidebarFeatures: ['dashboard', 'branches', 'departments', 'sales', 'finance', 'inventory', 'hr', 'crm', 'projects', 'tasks', 'reports', 'events', 'settings'],
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    },
+    permissions: ['all_access'],
+    sidebarFeatures: ['dashboard', 'branches', 'departments', 'sales', 'finance', 'inventory', 'hr', 'crm', 'projects', 'tasks', 'reports', 'events', 'settings'],
+    status: 'active',
+    department: 'IT',
+    position: 'System Administrator',
+    phone: '+255123456789',
+    avatar: undefined,
+    lastLogin: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -79,24 +110,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const clearError = () => setError(null)
 
-  // Check for existing token on mount
+  // Check for existing user on mount
   useEffect(() => {
-    const checkAuth = async () => {
+    const savedUser = localStorage.getItem('mock-user')
+    if (savedUser) {
       try {
-        const token = localStorage.getItem('auth-token')
-        if (token) {
-          const userData = await authAPI.getCurrentUser()
-          setUser(userData)
-        }
+        setUser(JSON.parse(savedUser))
       } catch (error) {
-        console.error('Auth check failed:', error)
-        localStorage.removeItem('auth-token')
-      } finally {
-        setLoading(false)
+        console.error('Error parsing saved user:', error)
+        localStorage.removeItem('mock-user')
       }
     }
-
-    checkAuth()
+    setLoading(false)
   }, [])
 
   const signInWithEmail = async (email: string, password: string) => {
@@ -104,13 +129,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(true)
       setError(null)
       
-      const { user: userData } = await authAPI.login(email, password)
-      setUser(userData)
-      
-      // Redirect to dashboard after successful login
-      window.location.href = '/'
-    } catch (error) {
-      setError('Authentication failed. Please check your credentials.')
+      // Mock authentication - you can modify this logic
+      if (email === 'johnjohngora@gmail.com' && password === 'admin123') {
+        const userData = MOCK_USERS[email]
+        setUser(userData)
+        localStorage.setItem('mock-user', JSON.stringify(userData))
+        
+        // Redirect to dashboard after successful login
+        window.location.href = '/'
+      } else {
+        throw new Error('Invalid credentials. Use: johnjohngora@gmail.com / admin123')
+      }
+    } catch (error: any) {
+      setError(error.message || 'Authentication failed. Please check your credentials.')
       throw error
     } finally {
       setLoading(false)
@@ -119,15 +150,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await authAPI.logout()
       setUser(null)
+      localStorage.removeItem('mock-user')
       // Redirect to login page
       window.location.href = '/login'
     } catch (error) {
       console.error('Logout error:', error)
-      // Force logout even if API call fails
+      // Force logout even if there's an error
       setUser(null)
-      localStorage.removeItem('auth-token')
+      localStorage.removeItem('mock-user')
       window.location.href = '/login'
     }
   }
@@ -135,9 +166,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string) => {
     try {
       setError(null)
-      await authAPI.requestPasswordReset(email)
-    } catch (error) {
-      setError('Password reset failed. Please try again.')
+      // Mock password reset - in real app, this would send an email
+      setError('Password reset functionality not implemented in demo mode')
+      throw new Error('Password reset functionality not implemented in demo mode')
+    } catch (error: any) {
+      setError(error.message || 'Password reset failed. Please try again.')
       throw error
     }
   }
@@ -149,8 +182,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const refreshUserData = async () => {
     try {
       if (user) {
-        const userData = await authAPI.getCurrentUser()
-        setUser(userData)
+        // In mock mode, just refresh from localStorage
+        const savedUser = localStorage.getItem('mock-user')
+        if (savedUser) {
+          setUser(JSON.parse(savedUser))
+        }
       }
     } catch (error) {
       console.error('Error refreshing user data:', error)
@@ -182,7 +218,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const isHR = (): boolean => {
     if (!user) return false
-    return user.role === 'HR Manager' || user.role === 'HR Specialist' || user.permissions.includes('hr_access')
+    // You can assign anyone to be HR - check if they have HR permissions
+    return user.permissions.includes('hr_access') || user.permissions.includes('all_access')
   }
 
   const isAdmin = (): boolean => {

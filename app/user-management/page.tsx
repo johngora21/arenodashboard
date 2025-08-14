@@ -116,32 +116,18 @@ const SIDEBAR_FEATURES_LIST = [
 function UserManagementPage() {
   const { user } = useAuth()
 
-  // Mock data
+  // Mock data - you can modify these users as needed
   const mockUsers: User[] = [
     {
       id: '1',
-      name: 'Admin User',
-      email: 'admin@iris.com',
+      name: 'John Gora',
+      email: 'johnjohngora@gmail.com',
       role: 'Super Admin',
       roleId: '1',
       department: 'IT',
       position: 'System Administrator',
       phone: '+255123456789',
       permissions: ['all_access'],
-      status: 'active',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    },
-    {
-      id: '2',
-      name: 'John Doe',
-      email: 'john@iris.com',
-      role: 'Manager',
-      roleId: '2',
-      department: 'HR',
-      position: 'HR Manager',
-      phone: '+255123456790',
-      permissions: ['hr_access', 'user_management'],
       status: 'active',
       createdAt: new Date(),
       updatedAt: new Date()

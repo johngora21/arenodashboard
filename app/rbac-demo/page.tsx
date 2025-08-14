@@ -48,11 +48,11 @@ export default function RBACDemoPage() {
     },
     {
       id: '2',
-      name: 'HR Manager',
-      role: 'HR Manager',
-      permissions: ['hr_access', 'hr_create', 'hr_edit', 'dashboard_access', 'reports_access'],
-      sidebarFeatures: ['dashboard', 'hr', 'reports', 'settings'],
-      description: 'HR operations and user access management'
+      name: 'Department Manager',
+      role: 'Department Manager',
+      permissions: ['dashboard_access', 'reports_access', 'department_access'],
+      sidebarFeatures: ['dashboard', 'reports', 'settings'],
+      description: 'Department management and reporting'
     },
     {
       id: '3',

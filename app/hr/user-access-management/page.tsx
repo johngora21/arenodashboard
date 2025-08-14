@@ -82,27 +82,17 @@ export default function UserAccessManagementPage() {
   const [message, setMessage] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
 
-  // Mock data
+  // Mock data - you can modify these users as needed
   const mockUsers: User[] = [
     {
       id: '1',
-      name: 'John Doe',
-      email: 'john@iris.com',
-      role: 'Manager',
-      department: 'Engineering',
+      name: 'John Gora',
+      email: 'johnjohngora@gmail.com',
+      role: 'Super Admin',
+      department: 'IT',
       status: 'active',
-      permissions: ['dashboard_access', 'projects_access'],
-      sidebarFeatures: ['dashboard', 'projects', 'tasks']
-    },
-    {
-      id: '2',
-      name: 'Jane Smith',
-      email: 'jane@iris.com',
-      role: 'HR Specialist',
-      department: 'HR',
-      status: 'active',
-      permissions: ['dashboard_access', 'hr_access'],
-      sidebarFeatures: ['dashboard', 'hr', 'reports']
+      permissions: ['all_access'],
+      sidebarFeatures: ['dashboard', 'branches', 'departments', 'sales', 'finance', 'inventory', 'hr', 'crm', 'projects', 'tasks', 'reports', 'events', 'settings']
     }
   ]
 

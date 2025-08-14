@@ -76,32 +76,7 @@ export default function Sidebar() {
     }
   }
 
-  // Show role indicator for HR and Super Admin
-  const getRoleIndicator = () => {
-    if (!user) return null
-    
-    if (isSuperAdmin()) {
-      return (
-        <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium mb-2">
-          Super Admin
-        </div>
-      )
-    }
-    
-    if (isHR()) {
-      return (
-        <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium mb-2">
-          HR Manager
-        </div>
-      )
-    }
-    
-    return (
-      <div className="px-3 py-1 bg-slate-100 text-slate-800 rounded-full text-xs font-medium mb-2">
-        {user.role}
-      </div>
-    )
-  }
+
 
   return (
     <div className="w-64 bg-slate-900 border-r border-slate-800 fixed left-0 top-0 h-screen overflow-hidden z-30">
@@ -123,15 +98,7 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* User Role Indicator */}
-        {user && (
-          <div className="px-4 py-2 border-b border-slate-800">
-            {getRoleIndicator()}
-            <div className="text-xs text-slate-400">
-              {user.name} • {user.department || 'No Department'}
-            </div>
-          </div>
-        )}
+
 
         {/* Navigation - Takes remaining space */}
         <nav className="flex-1 p-4 overflow-y-auto">

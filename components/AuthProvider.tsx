@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(null)
       
       // Mock authentication - you can modify this logic
-      if (email === 'johnjohngora@gmail.com' && password === 'admin123') {
+      if (email === 'johnjohngora@gmail.com' && password === '99009900') {
         const userData = MOCK_USERS[email]
         setUser(userData)
         localStorage.setItem('mock-user', JSON.stringify(userData))
@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Redirect to dashboard after successful login
         window.location.href = '/'
       } else {
-        throw new Error('Invalid credentials. Use: johnjohngora@gmail.com / admin123')
+        throw new Error('Invalid credentials. Use: johnjohngora@gmail.com / 99009900')
       }
     } catch (error: any) {
       setError(error.message || 'Authentication failed. Please check your credentials.')

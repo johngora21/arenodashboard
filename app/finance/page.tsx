@@ -48,6 +48,7 @@ import {
   Edit,
   Trash2
 } from "lucide-react";
+import { ResponsiveContainer, LineChart, PieChart, Pie, Cell, CartesianGrid, XAxis, YAxis, Tooltip, Line } from "recharts";
 
 export default function FinancePage() {
   const router = useRouter();
@@ -295,22 +296,25 @@ export default function FinancePage() {
                     <LineChart className="h-5 w-5 text-blue-500" />
                     <h3 className="text-lg font-semibold text-slate-800">Revenue vs Expenses (6 Months)</h3>
                   </div>
-                  <div className="h-80 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-200">
-                    <div className="text-center">
-                      <div className="w-64 h-48 bg-white rounded-lg shadow-sm border border-slate-200 flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="w-48 h-32 bg-gradient-to-r from-green-100 to-red-100 rounded-lg flex items-center justify-center">
-                            <div className="w-40 h-24 bg-gradient-to-r from-green-200 to-red-200 rounded flex items-center justify-center">
-                              <div className="w-32 h-16 bg-gradient-to-r from-green-300 to-red-300 rounded flex items-center justify-center">
-                                <div className="w-24 h-8 bg-gradient-to-r from-green-400 to-red-400 rounded"></div>
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-sm text-slate-600 mt-2 font-medium">Revenue vs Expenses</p>
-                          <p className="text-xs text-slate-500">Monthly comparison</p>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={[
+                        { month: 'Jan', revenue: 2800000, expenses: 1800000, profit: 1000000 },
+                        { month: 'Feb', revenue: 3200000, expenses: 2000000, profit: 1200000 },
+                        { month: 'Mar', revenue: 2900000, expenses: 1900000, profit: 1000000 },
+                        { month: 'Apr', revenue: 3500000, expenses: 2200000, profit: 1300000 },
+                        { month: 'May', revenue: 3800000, expenses: 2400000, profit: 1400000 },
+                        { month: 'Jun', revenue: 4200000, expenses: 2600000, profit: 1600000 }
+                      ]}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="month" />
+                        <YAxis />
+                        <Tooltip formatter={(value) => `TZS ${value.toLocaleString()}`} />
+                        <Line type="monotone" dataKey="revenue" stroke="#10B981" strokeWidth={3} name="Revenue" />
+                        <Line type="monotone" dataKey="expenses" stroke="#EF4444" strokeWidth={3} name="Expenses" />
+                        <Line type="monotone" dataKey="profit" stroke="#3B82F6" strokeWidth={3} name="Profit" />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
@@ -320,30 +324,34 @@ export default function FinancePage() {
                     <PieChart className="h-5 w-5 text-orange-500" />
                     <h3 className="text-lg font-semibold text-slate-800">Profit Distribution</h3>
                   </div>
-                  <div className="h-80 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-200">
-                    <div className="text-center">
-                      <div className="w-48 h-48 bg-white rounded-full shadow-sm border border-slate-200 flex items-center justify-center relative">
-                        <div className="absolute inset-2 bg-gradient-to-br from-green-400 to-blue-500 rounded-full"></div>
-                        <div className="absolute inset-4 bg-white rounded-full"></div>
-                        <div className="absolute inset-6 bg-gradient-to-br from-green-300 to-blue-400 rounded-full"></div>
-                        <div className="absolute inset-8 bg-white rounded-full"></div>
-                        <div className="absolute inset-10 bg-gradient-to-br from-green-200 to-blue-300 rounded-full"></div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-slate-800">34%</div>
-                          <div className="text-xs text-slate-600">Net Profit</div>
-                        </div>
-                      </div>
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                          <span className="text-slate-700">Revenue: 100%</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                          <span className="text-slate-700">Expenses: 66%</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Net Profit', value: 34, color: '#10B981' },
+                            { name: 'Operating Costs', value: 45, color: '#F59E0B' },
+                            { name: 'Taxes', value: 21, color: '#EF4444' }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value }) => `${name}: ${value}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {[
+                            { name: 'Net Profit', value: 34, color: '#10B981' },
+                            { name: 'Operating Costs', value: 45, color: '#F59E0B' },
+                            { name: 'Taxes', value: 21, color: '#EF4444' }
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
               </div>
